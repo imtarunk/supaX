@@ -85,7 +85,7 @@ export default function SparklingBackground() {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-transparent overflow-hidden">
+    <div className="fixed inset-0 bg-transparent overflow-hidden">
       <AnimatePresence>
         {sparkles.map((sparkle) => (
           <motion.div

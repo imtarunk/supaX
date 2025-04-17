@@ -1,32 +1,29 @@
 "use client";
-import React, { useRef, useState, useEffect } from "react";
-import { useScroll, useTransform, motion } from "framer-motion";
+
+import React, { useRef } from "react";
+import { useScroll, useTransform, motion, MotionValue } from "framer-motion";
 import Image from "next/image";
 
-interface ContainerScrollAnimationProps {
-  children: React.ReactNode;
-  className?: string;
-}
-
-export const ContainerScrollAnimation = ({
-  children,
-  className,
-}: ContainerScrollAnimationProps) => {
+export const ContainerScroll = ({
+  titleComponent,
+}: {
+  titleComponent: string | React.ReactNode;
+}) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
-    offset: ["start start", "end start"],
   });
+  const [isMobile, setIsMobile] = React.useState(false);
 
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
+  React.useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
+      setIsMobile(window.innerWidth <= 768);
     };
     checkMobile();
     window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
+    return () => {
+      window.removeEventListener("resize", checkMobile);
+    };
   }, []);
 
   const scaleDimensions = () => {
@@ -39,26 +36,17 @@ export const ContainerScrollAnimation = ({
 
   return (
     <div
-      className="h-[60rem] md:h-[80rem] flex items-center justify-center relative p-2 md:p-20"
+      className="h-[80rem] flex items-center justify-center relative p-20"
       ref={containerRef}
     >
       <div
-        className="py-10 md:py-40 w-full relative"
+        className="py-40 w-full relative"
         style={{
           perspective: "1000px",
         }}
       >
-        <motion.div
-          className={`w-full ${className}`}
-          style={{
-            rotateX: rotate,
-            scale,
-            translateY: translate,
-            transformStyle: "preserve-3d",
-          }}
-        >
-          {children}
-        </motion.div>
+        <Header translate={translate} titleComponent={titleComponent} />
+        <Card rotate={rotate} translate={translate} scale={scale} />
       </div>
     </div>
   );
@@ -68,7 +56,7 @@ export const Header = ({
   translate,
   titleComponent,
 }: {
-  translate: number;
+  translate: MotionValue<number>;
   titleComponent: React.ReactNode;
 }) => {
   return (
@@ -86,16 +74,18 @@ export const Header = ({
 export const Card = ({
   rotate,
   scale,
+  translate,
 }: {
-  rotate: number;
-  scale: number;
-  translate: number;
+  rotate: MotionValue<number>;
+  scale: MotionValue<number>;
+  translate: MotionValue<number>;
 }) => {
   return (
     <motion.div
       style={{
-        rotateX: rotate, // rotate in X-axis
+        rotateX: rotate,
         scale,
+        translateY: translate,
         boxShadow:
           "0 0 #0000004d, 0 9px 20px #0000004a, 0 37px 37px #00000042, 0 84px 50px #00000026, 0 149px 60px #0000000a, 0 233px 65px #00000003",
       }}

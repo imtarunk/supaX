@@ -18,6 +18,8 @@ export default async function Dashboard() {
                   src={user.image}
                   alt={user.name || "User"}
                   className="w-16 h-16 rounded-full"
+                  width={64}
+                  height={64}
                 />
               )}
               <div>
