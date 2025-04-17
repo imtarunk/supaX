@@ -1,13 +1,41 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+// Simple rate limiting
+const RATE_LIMIT_WINDOW = 60000; // 1 minute
+const MAX_REQUESTS = 5;
+const requestCounts = new Map<string, { count: number; resetTime: number }>();
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const userRequests = requestCounts.get(ip);
+
+  if (!userRequests || now > userRequests.resetTime) {
+    requestCounts.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
+    return true;
+  }
+
+  if (userRequests.count >= MAX_REQUESTS) {
+    return false;
+  }
+
+  userRequests.count++;
+  return true;
+}
+
 export async function GET(request: Request) {
   try {
     const url = new URL(request.url);
     const code = url.searchParams.get("code");
+    const ip = request.headers.get("x-forwarded-for") || "unknown";
 
     if (!code) {
-      throw new Error("No code provided");
+      throw new Error("No authorization code provided");
+    }
+
+    // Check rate limit
+    if (!checkRateLimit(ip)) {
+      throw new Error("Too many requests. Please try again later.");
     }
 
     // Exchange code for tokens
@@ -28,8 +56,16 @@ export async function GET(request: Request) {
       }
     );
 
+    if (!tokenResponse.ok) {
+      const error = await tokenResponse.json();
+      console.error("Token exchange failed:", error);
+      throw new Error(
+        `Token exchange failed: ${error.error_description || error.error}`
+      );
+    }
+
     const tokens = await tokenResponse.json();
-    console.log("Tokens received:", tokens);
+    console.log("Tokens received successfully");
 
     // Get user info
     const userResponse = await fetch(`${process.env.AUTH0_DOMAIN}/userinfo`, {
@@ -38,8 +74,16 @@ export async function GET(request: Request) {
       },
     });
 
+    if (!userResponse.ok) {
+      const error = await userResponse.json();
+      console.error("User info fetch failed:", error);
+      throw new Error(
+        `Failed to fetch user info: ${error.error_description || error.error}`
+      );
+    }
+
     const userInfo = await userResponse.json();
-    console.log("User info received:", userInfo);
+    console.log("User info received successfully");
 
     // Calculate token expiration time
     const tokenExpires = new Date();
@@ -48,7 +92,7 @@ export async function GET(request: Request) {
     // Save user and tokens to database
     const user = await prisma.user.upsert({
       where: {
-        email: userInfo.email,
+        twitterId: userInfo.sub,
       },
       update: {
         name: userInfo.name,
@@ -72,32 +116,35 @@ export async function GET(request: Request) {
       },
     });
 
-    console.log("User and tokens saved to database:", user);
+    console.log("User and tokens saved to database successfully", user);
 
     // Store tokens in secure cookies
     const response = NextResponse.redirect(
       new URL("/dashboard", process.env.APP_BASE_URL)
     );
-    response.cookies.set("access_token", tokens.access_token, {
+
+    // Set secure cookie options
+    const cookieOptions = {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      sameSite: "lax" as const,
       path: "/",
       expires: tokenExpires,
-    });
-    response.cookies.set("id_token", tokens.id_token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      expires: tokenExpires,
-    });
+    };
+
+    response.cookies.set("access_token", tokens.access_token, cookieOptions);
+    response.cookies.set("id_token", tokens.id_token, cookieOptions);
 
     return response;
   } catch (error) {
-    console.error("Callback error:", error);
+    console.error("Authentication error:", error);
     return NextResponse.redirect(
-      new URL("/auth/login?error=callback", process.env.APP_BASE_URL)
+      new URL(
+        `/auth/login?error=${encodeURIComponent(
+          error instanceof Error ? error.message : "Authentication failed"
+        )}`,
+        process.env.APP_BASE_URL
+      )
     );
   }
 }
