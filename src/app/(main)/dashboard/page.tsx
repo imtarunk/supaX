@@ -1,5 +1,6 @@
 import { getCurrentUser } from "@/lib/auth";
 import Navbar from "@/components/navbar";
+import Image from "next/image";
 
 export default async function Dashboard() {
   const user = await getCurrentUser();
@@ -13,7 +14,7 @@ export default async function Dashboard() {
           <div className="bg-gray-800 p-6 rounded-lg">
             <div className="flex items-center space-x-4">
               {user.image && (
-                <img
+                <Image
                   src={user.image}
                   alt={user.name || "User"}
                   className="w-16 h-16 rounded-full"

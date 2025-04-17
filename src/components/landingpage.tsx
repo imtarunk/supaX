@@ -1,7 +1,7 @@
 "use client";
 
 import { testimonials } from "@/lib/data";
-import { ContainerScroll } from "./ui/container-scroll-animation";
+import { ContainerScrollAnimation } from "./ui/container-scroll-animation";
 import { InfiniteMovingCards } from "./ui/infinite-moving-cards";
 import { WobbleCard } from "./ui/wobble-card";
 const recipientId = "1622174627924672513"; // Replace with actual Twitter user ID
@@ -24,28 +24,25 @@ const LandingPage = () => {
       >
         GET IN TOUCH
       </button>
-      <ContainerScroll
-        titleComponent={
-          <div className="flex items-center justify-center flex-col text-center px-4">
-            <h3 className="text-lg md:text-xl font-semibold mb-2">
-              SuperFi by{" "}
-              <span className="text-yellow-400 font-bold">[LOGO]</span>{" "}
-              Superstellar
-            </h3>
+      <ContainerScrollAnimation>
+        <div className="flex items-center justify-center flex-col text-center px-4">
+          <h3 className="text-lg md:text-xl font-semibold mb-2">
+            SuperFi by <span className="text-yellow-400 font-bold">[LOGO]</span>{" "}
+            Superstellar
+          </h3>
 
-            <h1 className="text-2xl md:text-3xl tracking-widest uppercase">
-              <span className="font-extrabold">S</span>UPERCHARGE{" "}
-              <span className="font-extrabold">Y</span>OUR{" "}
-              <span className="font-extrabold">C</span>RYPTO{" "}
-              <span className="font-extrabold">C</span>OMMUNITY
-            </h1>
+          <h1 className="text-2xl md:text-3xl tracking-widest uppercase">
+            <span className="font-extrabold">S</span>UPERCHARGE{" "}
+            <span className="font-extrabold">Y</span>OUR{" "}
+            <span className="font-extrabold">C</span>RYPTO{" "}
+            <span className="font-extrabold">C</span>OMMUNITY
+          </h1>
 
-            <h1 className="text-4xl sm:text-6xl md:text-8xl bg-clip-text text-transparent bg-gradient-to-b from-white to-neutral-600 font-stretch-b mt-6">
-              EFFORTLESSLY
-            </h1>
-          </div>
-        }
-      />
+          <h1 className="text-4xl sm:text-6xl md:text-8xl bg-clip-text text-transparent bg-gradient-to-b from-white to-neutral-600 font-stretch-b mt-6">
+            EFFORTLESSLY
+          </h1>
+        </div>
+      </ContainerScrollAnimation>
 
       {/* Main Text Section */}
       <div className="max-w-5xl mx-auto px-6 mt-16 text-center">

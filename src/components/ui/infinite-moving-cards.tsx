@@ -1,15 +1,8 @@
 "use client";
 
-import { cn } from "@/lib/utils";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 
-export const InfiniteMovingCards = ({
-  items,
-  direction = "left",
-  speed = "fast",
-  pauseOnHover = true,
-  className,
-}: {
+interface InfiniteMovingCardsProps {
   items: {
     quote: string;
     name: string;
@@ -19,15 +12,20 @@ export const InfiniteMovingCards = ({
   speed?: "fast" | "normal" | "slow";
   pauseOnHover?: boolean;
   className?: string;
-}) => {
-  const containerRef = React.useRef<HTMLDivElement>(null);
-  const scrollerRef = React.useRef<HTMLUListElement>(null);
+}
 
-  useEffect(() => {
-    addAnimation();
-  }, []);
+export const InfiniteMovingCards = ({
+  items,
+  direction = "left",
+  speed = "fast",
+  pauseOnHover = true,
+  className,
+}: InfiniteMovingCardsProps) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const scrollerRef = useRef<HTMLUListElement>(null);
   const [start, setStart] = useState(false);
-  function addAnimation() {
+
+  const addAnimation = useCallback(() => {
     if (containerRef.current && scrollerRef.current) {
       const scrollerContent = Array.from(scrollerRef.current.children);
 
@@ -42,7 +40,8 @@ export const InfiniteMovingCards = ({
       getSpeed();
       setStart(true);
     }
-  }
+  }, [direction, speed]);
+
   const getDirection = () => {
     if (containerRef.current) {
       if (direction === "left") {
@@ -58,6 +57,7 @@ export const InfiniteMovingCards = ({
       }
     }
   };
+
   const getSpeed = () => {
     if (containerRef.current) {
       if (speed === "fast") {
@@ -69,41 +69,41 @@ export const InfiniteMovingCards = ({
       }
     }
   };
+
+  useEffect(() => {
+    addAnimation();
+  }, [addAnimation]);
+
   return (
     <div
       ref={containerRef}
-      className={cn(
-        "scroller relative z-20 max-w-7xl overflow-hidden [mask-image:linear-gradient(to_right,transparent,white_20%,white_80%,transparent)]",
-        className
-      )}
+      className={`scroller relative z-20 max-w-7xl overflow-hidden [mask-image:linear-gradient(to_right,transparent,white_20%,white_80%,transparent)] ${className}`}
     >
       <ul
         ref={scrollerRef}
-        className={cn(
-          "flex w-max min-w-full shrink-0 flex-nowrap gap-4 py-4",
-          start && "animate-scroll",
-          pauseOnHover && "hover:[animation-play-state:paused]"
-        )}
+        className={`flex min-w-full shrink-0 gap-4 py-4 w-max flex-nowrap ${
+          start && "animate-scroll"
+        } ${pauseOnHover && "hover:[animation-play-state:paused]"}`}
       >
-        {items.map((item) => (
+        {items.map((item, idx) => (
           <li
-            className="relative w-[350px] max-w-full shrink-0 rounded-2xl border border-b-0 border-zinc-200 bg-[linear-gradient(180deg,#fafafa,#f5f5f5)] px-8 py-6 md:w-[450px] dark:border-zinc-700 dark:bg-[linear-gradient(180deg,#27272a,#18181b)]"
-            key={item.name}
+            className="w-[350px] max-w-full relative rounded-2xl border border-b-0 flex-shrink-0 border-slate-700 px-8 py-6 md:w-[450px]"
+            key={idx}
           >
             <blockquote>
               <div
                 aria-hidden="true"
-                className="user-select-none pointer-events-none absolute -top-0.5 -left-0.5 -z-1 h-[calc(100%_+_4px)] w-[calc(100%_+_4px)]"
+                className="user-select-none -z-1 pointer-events-none absolute -left-0.5 -top-0.5 h-[calc(100%_+_4px)] w-[calc(100%_+_4px)]"
               ></div>
-              <span className="relative z-20 text-sm leading-[1.6] font-normal text-neutral-800 dark:text-gray-100">
+              <span className="relative z-20 text-sm leading-[1.6] text-gray-100 font-normal">
                 {item.quote}
               </span>
               <div className="relative z-20 mt-6 flex flex-row items-center">
                 <span className="flex flex-col gap-1">
-                  <span className="text-sm leading-[1.6] font-normal text-neutral-500 dark:text-gray-400">
+                  <span className="text-sm leading-[1.6] text-gray-400 font-normal">
                     {item.name}
                   </span>
-                  <span className="text-sm leading-[1.6] font-normal text-neutral-500 dark:text-gray-400">
+                  <span className="text-sm leading-[1.6] text-gray-400 font-normal">
                     {item.title}
                   </span>
                 </span>
