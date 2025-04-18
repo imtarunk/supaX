@@ -10,13 +10,12 @@ const handler = NextAuth({
       clientId: process.env.TWITTER_CLIENT_ID as string,
       clientSecret: process.env.TWITTER_CLIENT_SECRET as string,
       version: "2.0",
-      token: {
+      authorization: {
         params: {
           include_email: true,
         },
       },
       profile: (profile) => {
-        console.log("Twitter Profile:", profile);
         return {
           id: profile.data.id,
           name: profile.data.name,
@@ -27,10 +26,8 @@ const handler = NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, account, profile }) {
+    async jwt({ token, account }) {
       console.log("JWT Callback - Token:", token);
-      console.log("JWT Callback - Account:", account);
-      console.log("JWT Callback - Profile:", profile);
 
       if (account) {
         token.accessToken = account.access_token;
@@ -41,8 +38,6 @@ const handler = NextAuth({
       return token;
     },
     async session({ session, user, token }) {
-      console.log("Session Callback - Session:", session);
-      console.log("Session Callback - User:", user);
       console.log("Session Callback - Token:", token);
 
       if (session.user) {

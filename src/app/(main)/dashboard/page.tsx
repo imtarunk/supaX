@@ -1,7 +1,8 @@
 import { getCurrentUser } from "@/lib/auth";
 import Navbar from "@/components/navbar";
 import Image from "next/image";
-
+import TaskCard from "@/components/taskcard";
+import { tasks } from "@/lib/data";
 export default async function Dashboard() {
   const user = await getCurrentUser();
 
@@ -35,6 +36,11 @@ export default async function Dashboard() {
           <p>No user data available</p>
         )}
       </div>
+      {tasks.map((task) => (
+        <div className="container p-2 mx-auto" key={task.task}>
+          <TaskCard key={task.task} {...task} icon={task.icon} />
+        </div>
+      ))}
     </div>
   );
 }

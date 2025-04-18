@@ -1,11 +1,11 @@
 import { redirect } from "next/navigation";
-import XIcon from "./icons/icons";
+import { XIcon } from "./icons/icons";
 import { Button } from "./ui/button";
 
 const XCardAuth = () => {
   return (
     <div>
-      <XIcon />
+      <XIcon width={100} height={100} />
       <p>Connect your X account</p>
       <Button
         onClick={() => {

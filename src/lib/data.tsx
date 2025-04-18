@@ -1,3 +1,5 @@
+import { XIcon } from "@/components/icons/icons";
+
 export const testimonials = [
   {
     quote: "This platform boosted our engagement by 10x!",
@@ -24,4 +26,15 @@ export const testimonials = [
     name: "SyncMaster",
     title: "Founder @ Questor",
   },
+];
+
+export const tasks = [
+  {
+    icon: <XIcon width={40} height={40} />,
+    task: "Complete daily challenge",
+    points: 50,
+  },
+  { icon: "📝", task: "Submit project report", points: 100 },
+  { icon: "👥", task: "Collaborate with team members", points: 75 },
+  { icon: "🔍", task: "Review code changes", points: 60 },
 ];
