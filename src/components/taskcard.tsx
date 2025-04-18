@@ -1,4 +1,5 @@
 "use client";
+
 import {
   XIcon,
   FollowIcon,
@@ -6,12 +7,16 @@ import {
   DefaultIcon,
 } from "@/components/icons/icons";
 import React, { useState } from "react";
+import axios from "axios";
+import AlternativeLoadingScreen from "./questLoaded";
 
 type TaskType = "tweet" | "follow" | "like";
 
 interface TaskItem {
   type: TaskType;
-  content: string;
+  content:
+    | string
+    | { text: string; url?: string; hashtags?: string; via?: string }[];
 }
 
 interface TaskCardProps {
@@ -27,6 +32,7 @@ export default function TaskCard({
   completed = false,
 }: TaskCardProps) {
   const [isHovering, setIsHovering] = useState(false);
+  const [loading, setLoading] = useState(false); // ✅ fixed
   const taskType = task[0]?.type;
 
   const renderIcon = () => {
@@ -42,21 +48,69 @@ export default function TaskCard({
     }
   };
 
-  const truncateContent = (content: string) => {
-    const words = content.split(" ");
-    if (words.length > 15) {
-      return words.slice(0, 15).join(" ") + "...";
+  const truncateContent = (
+    content:
+      | string
+      | { text: string; url?: string; hashtags?: string; via?: string }[]
+  ) => {
+    try {
+      const text =
+        typeof content === "string"
+          ? JSON.parse(content).text
+          : content[0]?.text;
+
+      const words = text?.split(" ") || [];
+      return words.length > 15 ? words.slice(0, 15).join(" ") + "..." : text;
+    } catch (err) {
+      console.warn("Invalid JSON or text content:", err);
+      const words =
+        typeof content === "string"
+          ? content.split(" ")
+          : content[0]?.text?.split(" ") || [];
+
+      return words.length > 15
+        ? words.slice(0, 15).join(" ") + "..."
+        : words.join(" ");
     }
-    return content;
+  };
+
+  const handleClick = async () => {
+    if (completed || loading) return;
+
+    setLoading(true);
+
+    try {
+      if (taskType === "tweet") {
+        let tweetData;
+        if (typeof task[0].content === "string") {
+          tweetData = JSON.parse(task[0].content);
+        } else {
+          tweetData = task[0].content[0];
+        }
+
+        const response = await axios.post("/api/create/tweet", {
+          text: tweetData.text,
+          url: tweetData.url,
+          hashtags: tweetData.hashtags,
+          via: tweetData.via,
+        });
+
+        console.log("Tweet Redirect Link:", response.data.TweetRedirectLink);
+        window.open(response.data.TweetRedirectLink, "_blank");
+      } else {
+        console.log(`No handler defined for task type: ${taskType}`);
+      }
+    } catch (error) {
+      console.error("Error handling task click:", error);
+    } finally {
+    }
   };
 
   return (
     <div className="bg-black rounded-2xl sm:rounded-3xl p-3 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0 w-full max-w-4xl mx-auto border border-gray-800 transition-all duration-300 hover:border-gray-700 hover:shadow-md hover:shadow-gray-900/30 z-10">
-      {/* Icon and Text Content - Stack on mobile, row on larger screens */}
+      {/* Icon and Text Content */}
       <div className="flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-6 w-full sm:w-auto">
         <div className="text-white scale-90 sm:scale-100">{renderIcon()}</div>
-
-        {/* Text Content */}
         <div className="text-white text-center sm:text-left">
           <div className="text-base sm:text-xl font-bold">
             {taskType === "tweet"
@@ -86,17 +140,19 @@ export default function TaskCard({
           className={`absolute -inset-1 bg-gradient-to-r from-lime-400 to-lime-300 rounded-lg transition-all duration-300 ${
             isHovering ? "scale-105 opacity-100" : "scale-95 opacity-90"
           }`}
-        ></div>
+        />
         <button
           className={`relative bg-black text-white px-4 sm:px-8 py-2 sm:py-3 rounded-lg font-bold text-base sm:text-xl w-full sm:w-auto transition-transform duration-200 ${
             isHovering ? "scale-105 shadow-lg" : ""
           } cursor-pointer`}
-          onMouseEnter={() => setIsHovering(true)}
-          onMouseLeave={() => setIsHovering(false)}
+          onClick={handleClick}
         >
-          {completed ? "Completed" : "Go"}
+          {loading ? "Loading..." : completed ? "Completed" : "Go"}
         </button>
       </div>
+
+      {/* Optional: Loading Screen Overlay */}
+      {loading && <AlternativeLoadingScreen />}
     </div>
   );
 }

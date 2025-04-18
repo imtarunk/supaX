@@ -7,7 +7,14 @@ export const taskSchema = z.object({
   task: z.array(
     z.object({
       type: z.string(),
-      content: z.string(),
+      content: z.array(
+        z.object({
+          text: z.string(),
+          url: z.string().optional(),
+          hashtags: z.string().optional(),
+          via: z.string().optional(),
+        })
+      ),
     })
   ),
   points: z.number(),
