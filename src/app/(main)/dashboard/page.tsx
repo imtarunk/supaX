@@ -10,7 +10,7 @@ export default async function Dashboard() {
   const user = await getCurrentUser();
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen text-white z-10 relative">
       <Navbar />
 
       <div className="container mx-auto px-4 py-6">

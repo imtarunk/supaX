@@ -3,46 +3,79 @@
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
+import Link from "next/link";
 
 function SignInContent() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
   const error = searchParams.get("error");
   const [isLoading, setIsLoading] = useState(true);
+  const [retryCount, setRetryCount] = useState(0);
+  const maxRetries = 3;
 
   useEffect(() => {
-    if (!error) {
-      signIn("twitter", { callbackUrl });
-    }
-    setIsLoading(false);
-  }, [callbackUrl, error]);
+    const handleSignIn = async () => {
+      if (!error) {
+        await signIn("twitter", { callbackUrl });
+      } else if (error === "OAuthCallback" && retryCount < maxRetries) {
+        // Wait for 5 seconds before retrying
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+        setRetryCount((prev) => prev + 1);
+        await signIn("twitter", { callbackUrl });
+      }
+      setIsLoading(false);
+    };
+
+    handleSignIn();
+  }, [callbackUrl, error, retryCount]);
 
   if (error) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
+      <div className="flex min-h-screen items-center justify-center px-4">
+        <div className="text-center max-w-md">
           <h1 className="text-2xl font-bold mb-4">Authentication Error</h1>
           <p className="text-red-600 mb-4">
             {error === "OAuthSignin"
               ? "Error signing in with Twitter. Please try again."
+              : error === "OAuthCallback"
+              ? retryCount < maxRetries
+                ? `Rate limit reached. Retrying in 5 seconds... (${
+                    retryCount + 1
+                  }/${maxRetries})`
+                : "Too many requests. Please try again later."
+              : error === "OAuthAccountNotLinked"
+              ? "This Twitter account is not linked to any user. Please try signing in with a different account."
               : "An error occurred during authentication."}
           </p>
-          <button
-            onClick={() => signIn("twitter", { callbackUrl })}
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-          >
-            Try again
-          </button>
+          <div className="space-y-4">
+            {retryCount >= maxRetries && (
+              <button
+                onClick={() => {
+                  setRetryCount(0);
+                  signIn("twitter", { callbackUrl });
+                }}
+                className="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
+              >
+                Try Again
+              </button>
+            )}
+            <Link
+              href="/"
+              className="block text-blue-500 hover:text-blue-700 underline"
+            >
+              Return to Home
+            </Link>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <div className="text-center">
+    <div className="flex min-h-screen items-center justify-center px-4">
+      <div className="text-center max-w-md">
         <h1 className="text-2xl font-bold mb-4">Signing in...</h1>
-        <p className="text-gray-600">
+        <p className="text-gray-600 mb-4">
           Please wait while we redirect you to Twitter.
         </p>
         {isLoading && (
@@ -55,7 +88,7 @@ function SignInContent() {
   );
 }
 
-export default function SignIn() {
+export default function SignInPage() {
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <SignInContent />

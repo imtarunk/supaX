@@ -60,7 +60,7 @@ model Session {
 model Task {
   id        String     @id @default(cuid())
   icon      String
-  task      String
+  task      Json[]
   points    Int
   completed Boolean    @default(false)
   createdAt DateTime   @default(now())

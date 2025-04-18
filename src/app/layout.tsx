@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { Space_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "../components/theme.provider";
-// import SparklingBackground from "@/components/ui/sparkling-backgroud";
+import SparklingBackground from "@/components/ui/sparkling-backgroud";
 
 const spaceMono = Space_Mono({
   subsets: ["latin"],
@@ -35,7 +35,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           {children}
-          {/* <SparklingBackground /> */}
+          <SparklingBackground />
         </ThemeProvider>
       </body>
     </html>

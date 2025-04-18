@@ -4,6 +4,11 @@ import { z } from "zod";
 
 export const taskSchema = z.object({
   icon: z.string().min(2).max(50),
-  task: z.string().min(2).max(50),
-  points: z.any(),
+  task: z.array(
+    z.object({
+      type: z.string(),
+      content: z.string(),
+    })
+  ),
+  points: z.number(),
 });

@@ -17,6 +17,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function AdminPage() {
   const router = useRouter();
@@ -24,8 +31,13 @@ export default function AdminPage() {
     resolver: zodResolver(taskSchema),
     defaultValues: {
       icon: "",
-      task: "",
-      points: 0 as number,
+      task: [
+        {
+          type: "tweet",
+          content: "",
+        },
+      ],
+      points: 0,
     },
   });
 
@@ -39,101 +51,102 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="min-h-screen  text-gray-100 flex items-center justify-center">
-      <div className="container mx-auto py-12">
-        <div className="max-w-2xl mx-auto border border-gray-800 rounded-xl p-8  shadow-lg shadow-blue-900/10">
-          <h1 className="text-3xl font-bold mb-6 text-white">
+    <div className="min-h-screen  text-gray-100 flex items-center justify-center px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-2xl">
+        <div className="border border-gray-800 rounded-xl p-4 sm:p-8 shadow-lg shadow-blue-900/10">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-white text-center">
             Create New Task
           </h1>
-          <div className="border-b border-gray-800 mb-8"></div>
+          <div className="border-b border-gray-800 mb-6 sm:mb-8"></div>
 
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="space-y-4 sm:space-y-6"
+            >
               <FormField
                 control={form.control}
                 name="icon"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-gray-300">Icon</FormLabel>
+                    <FormLabel className="text-gray-300 text-sm sm:text-base">
+                      Icon
+                    </FormLabel>
                     <FormControl>
-                      <div className="relative">
-                        <Input
-                          placeholder="Icon svg code"
-                          {...field}
-                          className="bg-gray-800 border-gray-700 text-gray-100 focus:border-blue-500 focus:ring-blue-500 placeholder:text-gray-500"
-                        />
-                        <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-400">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <rect
-                              x="2"
-                              y="2"
-                              width="20"
-                              height="20"
-                              rx="5"
-                              ry="5"
-                            ></rect>
-                            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                          </svg>
-                        </div>
-                      </div>
+                      <Input
+                        placeholder="Icon svg code"
+                        {...field}
+                        className="bg-gray-800 border-gray-700 text-gray-100 focus:border-blue-500 focus:ring-blue-500 placeholder:text-gray-500 h-10 sm:h-12 text-sm sm:text-base"
+                      />
                     </FormControl>
-                    <FormDescription className="text-gray-500">
+                    <FormDescription className="text-gray-500 text-xs sm:text-sm">
                       This is the icon that will be displayed in the task card.
                     </FormDescription>
-                    <FormMessage className="text-red-400" />
+                    <FormMessage className="text-red-400 text-xs sm:text-sm" />
                   </FormItem>
                 )}
               />
 
               <FormField
                 control={form.control}
-                name="task"
+                name="task.0.type"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-gray-300">Task</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Input
-                          placeholder="Task"
-                          {...field}
-                          className="bg-gray-800 border-gray-700 text-gray-100 focus:border-blue-500 focus:ring-blue-500 placeholder:text-gray-500"
-                        />
-                        <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-400">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                            <polyline points="14 2 14 8 20 8"></polyline>
-                            <line x1="16" y1="13" x2="8" y2="13"></line>
-                            <line x1="16" y1="17" x2="8" y2="17"></line>
-                            <polyline points="10 9 9 9 8 9"></polyline>
-                          </svg>
-                        </div>
-                      </div>
-                    </FormControl>
-                    <FormDescription className="text-gray-500">
-                      This is the task that will be displayed in the task card.
+                    <FormLabel className="text-gray-300 text-sm sm:text-base">
+                      Task Type
+                    </FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="bg-gray-800 border-gray-700 text-gray-100 focus:border-blue-500 focus:ring-blue-500 h-10 sm:h-12 text-sm sm:text-base">
+                          <SelectValue placeholder="Select task type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="tweet">Tweet</SelectItem>
+                        <SelectItem value="follow">Follow</SelectItem>
+                        <SelectItem value="like">Like</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormDescription className="text-gray-500 text-xs sm:text-sm">
+                      Select the type of task to create.
                     </FormDescription>
-                    <FormMessage className="text-red-400" />
+                    <FormMessage className="text-red-400 text-xs sm:text-sm" />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="task.0.content"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-300 text-sm sm:text-base">
+                      Task Content
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder={
+                          form.watch("task.0.type") === "tweet"
+                            ? "Enter tweet content"
+                            : form.watch("task.0.type") === "follow"
+                            ? "Enter Twitter handle to follow"
+                            : "Enter tweet URL to like"
+                        }
+                        {...field}
+                        className="bg-gray-800 border-gray-700 text-gray-100 focus:border-blue-500 focus:ring-blue-500 placeholder:text-gray-500 h-10 sm:h-12 text-sm sm:text-base"
+                      />
+                    </FormControl>
+                    <FormDescription className="text-gray-500 text-xs sm:text-sm">
+                      {form.watch("task.0.type") === "tweet"
+                        ? "The content of the tweet"
+                        : form.watch("task.0.type") === "follow"
+                        ? "The Twitter handle to follow (without @)"
+                        : "The URL of the tweet to like"}
+                    </FormDescription>
+                    <FormMessage className="text-red-400 text-xs sm:text-sm" />
                   </FormItem>
                 )}
               />
@@ -143,37 +156,22 @@ export default function AdminPage() {
                 name="points"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-gray-300">Points</FormLabel>
+                    <FormLabel className="text-gray-300 text-sm sm:text-base">
+                      Points
+                    </FormLabel>
                     <FormControl>
-                      <div className="relative">
-                        <Input
-                          type="number"
-                          placeholder="Points"
-                          {...field}
-                          className="bg-gray-800 border-gray-700 text-gray-100 focus:border-blue-500 focus:ring-blue-500 placeholder:text-gray-500"
-                        />
-                        <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-400">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <circle cx="12" cy="8" r="7"></circle>
-                            <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
-                          </svg>
-                        </div>
-                      </div>
+                      <Input
+                        type="number"
+                        placeholder="Points"
+                        {...field}
+                        onChange={(e) => field.onChange(Number(e.target.value))}
+                        className="bg-gray-800 border-gray-700 text-gray-100 focus:border-blue-500 focus:ring-blue-500 placeholder:text-gray-500 h-10 sm:h-12 text-sm sm:text-base"
+                      />
                     </FormControl>
-                    <FormDescription className="text-gray-500">
+                    <FormDescription className="text-gray-500 text-xs sm:text-sm">
                       Points to be awarded for completing this task.
                     </FormDescription>
-                    <FormMessage className="text-red-400" />
+                    <FormMessage className="text-red-400 text-xs sm:text-sm" />
                   </FormItem>
                 )}
               />
@@ -181,9 +179,10 @@ export default function AdminPage() {
               <div className="pt-4">
                 <Button
                   type="submit"
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition-colors"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 sm:py-3 rounded-lg transition-colors text-sm sm:text-base"
+                  disabled={form.formState.isSubmitting}
                 >
-                  Create Task
+                  {form.formState.isSubmitting ? "Creating..." : "Create Task"}
                 </Button>
               </div>
             </form>
