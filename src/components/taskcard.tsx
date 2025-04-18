@@ -1,4 +1,5 @@
 "use client";
+import { handleTweet } from "@/app/api/create/tweet";
 import React, { useState } from "react";
 
 interface TaskCardProps {
@@ -15,7 +16,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
   const [isHovering, setIsHovering] = useState(false);
 
   return (
-    <div className="bg-black rounded-2xl sm:rounded-3xl p-3 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0 w-full max-w-4xl mx-auto border border-gray-800 transition-all duration-300 hover:border-gray-700 hover:shadow-md hover:shadow-gray-900/30">
+    <div className="bg-black rounded-2xl sm:rounded-3xl p-3 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0 w-full max-w-4xl mx-auto border border-gray-800 transition-all duration-300 hover:border-gray-700 hover:shadow-md hover:shadow-gray-900/30 z-10">
       {/* X Logo and Text Content - Stack on mobile, row on larger screens */}
       <div className="flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-6 w-full sm:w-auto">
         <div className="text-white scale-90 sm:scale-100">{icon}</div>
@@ -40,8 +41,11 @@ const TaskCard: React.FC<TaskCardProps> = ({
         ></div>
         <button
           className={`relative bg-black text-white px-4 sm:px-8 py-2 sm:py-3 rounded-lg font-bold text-base sm:text-xl w-full sm:w-auto transition-transform duration-200 ${
-            isHovering ? "transform scale-105" : ""
-          }`}
+            isHovering ? "scale-105 shadow-lg" : ""
+          } cursor-pointer`}
+          onClick={handleTweet}
+          onMouseEnter={() => setIsHovering(true)}
+          onMouseLeave={() => setIsHovering(false)}
         >
           Go
         </button>
