@@ -1,22 +1,15 @@
 "use client";
 
-import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { taskSchema } from "@/app/schema/z";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import axios from "axios";
+import { taskSchema } from "@/app/schema/z";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import {
   Select,
   SelectContent,
@@ -25,170 +18,193 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-export default function AdminPage() {
+type FormData = {
+  icon: string;
+  task: {
+    type: string;
+    content: string;
+  }[];
+  points: number;
+  tweetText?: string;
+  tweetUrl?: string;
+  tweetHashtags?: string;
+  tweetVia?: string;
+};
+
+export default function CreateTaskPage() {
   const router = useRouter();
-  const form = useForm<z.infer<typeof taskSchema>>({
+  const [isLoading, setIsLoading] = useState(false);
+  const [taskType, setTaskType] = useState<string>("");
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+    watch,
+  } = useForm<FormData>({
     resolver: zodResolver(taskSchema),
     defaultValues: {
       icon: "",
-      task: [
-        {
-          type: "tweet",
-          content: "",
-        },
-      ],
+      task: [{ type: "", content: "" }],
       points: 0,
     },
   });
 
-  const onSubmit = async (values: z.infer<typeof taskSchema>) => {
+  const onSubmit = async (data: FormData) => {
+    setIsLoading(true);
     try {
-      await axios.post("/api/admin/createtask", values);
-      router.push("/dashboard");
+      // If it's a tweet task, combine the tweet fields into content
+      if (data.task[0].type === "tweet") {
+        const tweetContent = {
+          text: data.tweetText || "",
+          url: data.tweetUrl || "",
+          hashtags: data.tweetHashtags || "",
+          via: data.tweetVia || "",
+        };
+        data.task[0].content = JSON.stringify(tweetContent);
+      }
+
+      const response = await fetch("/api/admin/createtask", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create task");
+      }
+
+      toast.success("Task created successfully");
+      router.push("/admin");
     } catch (error) {
       console.error("Error creating task:", error);
+      toast.error("Failed to create task");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen  text-gray-100 flex items-center justify-center px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-2xl">
-        <div className="border border-gray-800 rounded-xl p-4 sm:p-8 shadow-lg shadow-blue-900/10">
-          <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-white text-center">
-            Create New Task
-          </h1>
-          <div className="border-b border-gray-800 mb-6 sm:mb-8"></div>
-
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="space-y-4 sm:space-y-6"
-            >
-              <FormField
-                control={form.control}
-                name="icon"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-gray-300 text-sm sm:text-base">
-                      Icon
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Icon svg code"
-                        {...field}
-                        className="bg-gray-800 border-gray-700 text-gray-100 focus:border-blue-500 focus:ring-blue-500 placeholder:text-gray-500 h-10 sm:h-12 text-sm sm:text-base"
-                      />
-                    </FormControl>
-                    <FormDescription className="text-gray-500 text-xs sm:text-sm">
-                      This is the icon that will be displayed in the task card.
-                    </FormDescription>
-                    <FormMessage className="text-red-400 text-xs sm:text-sm" />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="task.0.type"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-gray-300 text-sm sm:text-base">
-                      Task Type
-                    </FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="bg-gray-800 border-gray-700 text-gray-100 focus:border-blue-500 focus:ring-blue-500 h-10 sm:h-12 text-sm sm:text-base">
-                          <SelectValue placeholder="Select task type" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="tweet">Tweet</SelectItem>
-                        <SelectItem value="follow">Follow</SelectItem>
-                        <SelectItem value="like">Like</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormDescription className="text-gray-500 text-xs sm:text-sm">
-                      Select the type of task to create.
-                    </FormDescription>
-                    <FormMessage className="text-red-400 text-xs sm:text-sm" />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="task.0.content"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-gray-300 text-sm sm:text-base">
-                      Task Content
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder={
-                          form.watch("task.0.type") === "tweet"
-                            ? "Enter tweet content"
-                            : form.watch("task.0.type") === "follow"
-                            ? "Enter Twitter handle to follow"
-                            : "Enter tweet URL to like"
-                        }
-                        {...field}
-                        className="bg-gray-800 border-gray-700 text-gray-100 focus:border-blue-500 focus:ring-blue-500 placeholder:text-gray-500 h-10 sm:h-12 text-sm sm:text-base"
-                      />
-                    </FormControl>
-                    <FormDescription className="text-gray-500 text-xs sm:text-sm">
-                      {form.watch("task.0.type") === "tweet"
-                        ? "The content of the tweet"
-                        : form.watch("task.0.type") === "follow"
-                        ? "The Twitter handle to follow (without @)"
-                        : "The URL of the tweet to like"}
-                    </FormDescription>
-                    <FormMessage className="text-red-400 text-xs sm:text-sm" />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="points"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-gray-300 text-sm sm:text-base">
-                      Points
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        placeholder="Points"
-                        {...field}
-                        onChange={(e) => field.onChange(Number(e.target.value))}
-                        className="bg-gray-800 border-gray-700 text-gray-100 focus:border-blue-500 focus:ring-blue-500 placeholder:text-gray-500 h-10 sm:h-12 text-sm sm:text-base"
-                      />
-                    </FormControl>
-                    <FormDescription className="text-gray-500 text-xs sm:text-sm">
-                      Points to be awarded for completing this task.
-                    </FormDescription>
-                    <FormMessage className="text-red-400 text-xs sm:text-sm" />
-                  </FormItem>
-                )}
-              />
-
-              <div className="pt-4">
-                <Button
-                  type="submit"
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 sm:py-3 rounded-lg transition-colors text-sm sm:text-base"
-                  disabled={form.formState.isSubmitting}
-                >
-                  {form.formState.isSubmitting ? "Creating..." : "Create Task"}
-                </Button>
-              </div>
-            </form>
-          </Form>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-2xl font-bold mb-6">Create New Task</h1>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <div className="space-y-2">
+          <Label htmlFor="icon">Icon (SVG)</Label>
+          <Textarea
+            id="icon"
+            {...register("icon")}
+            placeholder="Paste SVG icon code here"
+            className="min-h-[100px]"
+          />
+          {errors.icon && (
+            <p className="text-red-500 text-sm">{errors.icon.message}</p>
+          )}
         </div>
-      </div>
+
+        <div className="space-y-2">
+          <Label>Task Type</Label>
+          <Select
+            onValueChange={(value) => {
+              setTaskType(value);
+              setValue("task.0.type", value);
+            }}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select task type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="tweet">Tweet</SelectItem>
+              <SelectItem value="follow">Follow</SelectItem>
+              <SelectItem value="like">Like</SelectItem>
+            </SelectContent>
+          </Select>
+          {errors.task?.[0]?.type && (
+            <p className="text-red-500 text-sm">
+              {errors.task[0].type.message}
+            </p>
+          )}
+        </div>
+
+        {taskType === "tweet" ? (
+          <>
+            <div className="space-y-2">
+              <Label htmlFor="tweetText">Tweet Text (Optional)</Label>
+              <Input
+                id="tweetText"
+                {...register("tweetText")}
+                placeholder="Enter tweet text"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="tweetUrl">URL (Optional)</Label>
+              <Input
+                id="tweetUrl"
+                {...register("tweetUrl")}
+                placeholder="Enter URL to share"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="tweetHashtags">Hashtags (Optional)</Label>
+              <Input
+                id="tweetHashtags"
+                {...register("tweetHashtags")}
+                placeholder="Enter hashtags (comma separated)"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="tweetVia">Via (Optional)</Label>
+              <Input
+                id="tweetVia"
+                {...register("tweetVia")}
+                placeholder="Enter Twitter username for via"
+              />
+            </div>
+          </>
+        ) : (
+          <div className="space-y-2">
+            <Label htmlFor="content">Task Content</Label>
+            <Input
+              id="content"
+              {...register("task.0.content")}
+              placeholder={
+                taskType === "follow"
+                  ? "Enter Twitter username to follow"
+                  : taskType === "like"
+                  ? "Enter tweet ID to like"
+                  : "Enter task content"
+              }
+            />
+            {errors.task?.[0]?.content && (
+              <p className="text-red-500 text-sm">
+                {errors.task[0].content.message}
+              </p>
+            )}
+          </div>
+        )}
+
+        <div className="space-y-2">
+          <Label htmlFor="points">Points</Label>
+          <Input
+            id="points"
+            type="number"
+            {...register("points", { valueAsNumber: true })}
+            placeholder="Enter points"
+          />
+          {errors.points && (
+            <p className="text-red-500 text-sm">{errors.points.message}</p>
+          )}
+        </div>
+
+        <Button type="submit" disabled={isLoading}>
+          {isLoading ? "Creating..." : "Create Task"}
+        </Button>
+      </form>
     </div>
   );
 }

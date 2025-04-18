@@ -5,6 +5,7 @@ import { Space_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "../components/theme.provider";
 import SparklingBackground from "@/components/ui/sparkling-backgroud";
+import { Toaster } from "@/components/ui/sonner";
 
 const spaceMono = Space_Mono({
   subsets: ["latin"],
@@ -35,6 +36,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           {children}
+          <Toaster />
           <SparklingBackground />
         </ThemeProvider>
       </body>

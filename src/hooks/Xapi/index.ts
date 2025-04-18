@@ -1,4 +1,5 @@
 import axios, { AxiosResponse } from "axios";
+import dotenv from "dotenv";
 import OAuth from "oauth-1.0a";
 import crypto from "crypto";
 
@@ -13,39 +14,14 @@ declare module "oauth-1.0a" {
     hash_function: (base_string: string, key: string) => string;
   }
 
-  interface OAuthData {
-    url: string;
-    method: string;
-    data?: Record<string, unknown>;
-  }
-
-  interface OAuthToken {
-    key: string;
-    secret: string;
-  }
-
-  interface OAuthHeaders {
-    [key: string]: string;
-  }
-
   class OAuth {
     constructor(options: OAuthOptions);
-    toHeader(data: OAuthData): OAuthHeaders;
-    authorize(request_data: OAuthData, token?: OAuthToken): OAuthData;
+    toHeader(data: any): { [key: string]: string };
+    authorize(
+      request_data: { url: string; method: string },
+      token?: { key: string; secret: string }
+    ): any;
   }
-}
-
-// Custom error type for Twitter API errors
-interface TwitterApiError extends Error {
-  response?: {
-    status: number;
-    data: {
-      detail: string;
-    };
-    headers: {
-      "x-rate-limit-reset"?: string;
-    };
-  };
 }
 
 // Toast notification function
@@ -60,6 +36,8 @@ const showToast = (
   };
   console.log(`${colors[type]}[${type.toUpperCase()}] ${message}\x1b[0m`);
 };
+
+dotenv.config();
 
 const data = {
   id: "1684871141956239361",
@@ -200,14 +178,11 @@ const makeRequest = async (url: string): Promise<AxiosResponse> => {
         }
 
         resolve(res);
-      } catch (error: unknown) {
-        const twitterError = error as TwitterApiError;
-        if (twitterError.response?.status === 429) {
+      } catch (error: any) {
+        if (error.response?.status === 429) {
           // Rate limit exceeded, retry after delay
           const resetTime =
-            parseInt(
-              twitterError.response.headers["x-rate-limit-reset"] || "0"
-            ) * 1000;
+            parseInt(error.response.headers["x-rate-limit-reset"]) * 1000;
           const waitTime = resetTime - Date.now();
           showToast(
             `Rate limit exceeded. Waiting ${Math.ceil(
@@ -219,8 +194,8 @@ const makeRequest = async (url: string): Promise<AxiosResponse> => {
           requestQueue.unshift(requestFunction);
           processQueue();
         } else {
-          showToast(`Error: ${twitterError.message}`, "error");
-          reject(twitterError);
+          showToast(`Error: ${error.message}`, "error");
+          reject(error);
         }
       }
     };
@@ -238,19 +213,16 @@ const getMentions = async () => {
     const res = await makeRequest(url);
     console.log("Mentions:", res.data);
     showToast("Mentions fetched successfully!", "info");
-  } catch (error: unknown) {
-    const twitterError = error as TwitterApiError;
-    if (twitterError.response) {
-      showToast(
-        `Twitter API Error: ${twitterError.response.data.detail}`,
-        "error"
-      );
+  } catch (error: any) {
+    if (error.response) {
+      showToast(`Twitter API Error: ${error.response.data.detail}`, "error");
     } else {
-      showToast(`Error fetching mentions: ${twitterError.message}`, "error");
+      showToast(`Error fetching mentions: ${error.message}`, "error");
     }
   }
 };
 
+getMentions();
 // Get user's recent likes with rate limiting
 const getRecentLikes = async () => {
   try {
@@ -259,22 +231,16 @@ const getRecentLikes = async () => {
     const res = await makeRequest(url);
     console.log("Recent Likes:", res.data);
     showToast("Recent likes fetched successfully!", "info");
-  } catch (error: unknown) {
-    const twitterError = error as TwitterApiError;
-    if (twitterError.response) {
-      showToast(
-        `Twitter API Error: ${twitterError.response.data.detail}`,
-        "error"
-      );
+  } catch (error: any) {
+    if (error.response) {
+      showToast(`Twitter API Error: ${error.response.data.detail}`, "error");
     } else {
-      showToast(
-        `Error fetching recent likes: ${twitterError.message}`,
-        "error"
-      );
+      showToast(`Error fetching recent likes: ${error.message}`, "error");
     }
   }
 };
 
+// getRecentLikes();
 // Get user's followers with rate limiting
 const getFollowers = async () => {
   try {
@@ -283,18 +249,16 @@ const getFollowers = async () => {
     const res = await makeRequest(url);
     console.log("Followers:", res.data);
     showToast("Followers fetched successfully!", "info");
-  } catch (error: unknown) {
-    const twitterError = error as TwitterApiError;
-    if (twitterError.response) {
-      showToast(
-        `Twitter API Error: ${twitterError.response.data.detail}`,
-        "error"
-      );
+  } catch (error: any) {
+    if (error.response) {
+      showToast(`Twitter API Error: ${error.response.data.detail}`, "error");
     } else {
-      showToast(`Error fetching followers: ${twitterError.message}`, "error");
+      showToast(`Error fetching followers: ${error.message}`, "error");
     }
   }
 };
 
 // Export functions for individual use
+// getFollowers();
+
 export { getMentions, getRecentLikes, getFollowers };

@@ -2,12 +2,45 @@ import { getCurrentUser } from "@/lib/auth";
 import Navbar from "@/components/navbar";
 import Image from "next/image";
 import TaskCard from "@/components/taskcard";
-import { tasks } from "@/lib/data";
 import { Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { prisma } from "@/lib/prisma";
+
+type TaskType = "tweet" | "follow" | "like";
+
+interface TaskItem {
+  type: TaskType;
+  content: string;
+}
 
 export default async function Dashboard() {
   const user = await getCurrentUser();
+
+  // Fetch all tasks and user's completed tasks
+  const [tasks, userTasks] = await Promise.all([
+    prisma.task.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
+    }),
+    user
+      ? prisma.userTask.findMany({
+          where: {
+            userId: user.id,
+          },
+          select: {
+            taskId: true,
+            completed: true,
+          },
+        })
+      : [],
+  ]);
+
+  // Create a map of task IDs to completion status
+  const taskCompletionMap = userTasks.reduce((acc, userTask) => {
+    acc[userTask.taskId] = userTask.completed;
+    return acc;
+  }, {} as Record<string, boolean>);
 
   return (
     <div className="min-h-screen text-white z-10 relative">
@@ -101,8 +134,13 @@ export default async function Dashboard() {
         {/* Tasks Section */}
         <div className="space-y-4">
           {tasks.map((task) => (
-            <div className="w-full" key={task.task}>
-              <TaskCard {...task} icon={task.icon} />
+            <div className="w-full" key={task.id}>
+              <TaskCard
+                icon={task.icon}
+                task={task.task as unknown as TaskItem[]}
+                points={task.points}
+                completed={taskCompletionMap[task.id] || false}
+              />
             </div>
           ))}
         </div>
