@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 
 interface TaskCardProps {
-  icon: string;
+  icon: React.ReactNode;
   points: number;
   task: string;
 }
@@ -15,15 +15,15 @@ const TaskCard: React.FC<TaskCardProps> = ({
   const [isHovering, setIsHovering] = useState(false);
 
   return (
-    <div className="bg-black rounded-3xl p-4 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0 max-w-4xl mx-auto border border-gray-800 transition-all duration-300 hover:border-gray-700 hover:shadow-md hover:shadow-gray-900/30">
+    <div className="bg-black rounded-2xl sm:rounded-3xl p-3 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0 w-full max-w-4xl mx-auto border border-gray-800 transition-all duration-300 hover:border-gray-700 hover:shadow-md hover:shadow-gray-900/30">
       {/* X Logo and Text Content - Stack on mobile, row on larger screens */}
-      <div className="flex flex-col sm:flex-row items-center sm:items-center gap-3 sm:gap-6 w-full sm:w-auto">
-        <div className="text-white">{icon}</div>
+      <div className="flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-6 w-full sm:w-auto">
+        <div className="text-white scale-90 sm:scale-100">{icon}</div>
 
         {/* Text Content */}
         <div className="text-white text-center sm:text-left">
-          <div className="text-lg sm:text-xl font-bold">{task}</div>
-          <div className="text-gray-400 text-base sm:text-lg">{points} XP</div>
+          <div className="text-base sm:text-xl font-bold">{task}</div>
+          <div className="text-gray-400 text-sm sm:text-lg">{points} XP</div>
         </div>
       </div>
 
@@ -39,7 +39,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
           }`}
         ></div>
         <button
-          className={`relative bg-black text-white px-6 sm:px-8 py-2 sm:py-3 rounded-lg font-bold text-lg sm:text-xl w-full sm:w-auto transition-transform duration-200 ${
+          className={`relative bg-black text-white px-4 sm:px-8 py-2 sm:py-3 rounded-lg font-bold text-base sm:text-xl w-full sm:w-auto transition-transform duration-200 ${
             isHovering ? "transform scale-105" : ""
           }`}
         >

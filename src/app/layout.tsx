@@ -1,3 +1,5 @@
+// app/layout.tsx or wherever your root layout is
+
 import type { Metadata } from "next";
 import { Space_Mono } from "next/font/google";
 import "./globals.css";
@@ -32,8 +34,8 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <SparklingBackground />
           {children}
+          <SparklingBackground />
         </ThemeProvider>
       </body>
     </html>

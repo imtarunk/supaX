@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 interface InfiniteMovingCardsProps {
   items: {
@@ -25,14 +25,60 @@ export const InfiniteMovingCards = ({
   const scrollerRef = useRef<HTMLUListElement>(null);
   const [start, setStart] = useState(false);
 
-  const addAnimation = useCallback(() => {
-    if (containerRef.current && scrollerRef.current) {
-      const scrollerContent = Array.from(scrollerRef.current.children);
+  useEffect(() => {
+    if (containerRef.current) {
+      const scrollerRef = containerRef.current.querySelector(
+        "[data-scroller]"
+      ) as HTMLElement;
+      const scrollerInnerRef = containerRef.current.querySelector(
+        "[data-scroller-inner]"
+      ) as HTMLElement;
+
+      if (!scrollerRef || !scrollerInnerRef) return;
+
+      const getDirection = () => {
+        if (containerRef.current) {
+          if (direction === "left") {
+            containerRef.current.style.setProperty(
+              "--animation-direction",
+              "forwards"
+            );
+          } else {
+            containerRef.current.style.setProperty(
+              "--animation-direction",
+              "reverse"
+            );
+          }
+        }
+      };
+
+      const getSpeed = () => {
+        if (containerRef.current) {
+          if (speed === "fast") {
+            containerRef.current.style.setProperty(
+              "--animation-duration",
+              "20s"
+            );
+          } else if (speed === "normal") {
+            containerRef.current.style.setProperty(
+              "--animation-duration",
+              "40s"
+            );
+          } else {
+            containerRef.current.style.setProperty(
+              "--animation-duration",
+              "80s"
+            );
+          }
+        }
+      };
+
+      const scrollerContent = Array.from(scrollerInnerRef.children);
 
       scrollerContent.forEach((item) => {
-        const duplicatedItem = item.cloneNode(true);
-        if (scrollerRef.current) {
-          scrollerRef.current.appendChild(duplicatedItem);
+        const duplicatedItem = item.cloneNode(true) as HTMLElement;
+        if (duplicatedItem) {
+          scrollerRef.appendChild(duplicatedItem);
         }
       });
 
@@ -41,38 +87,6 @@ export const InfiniteMovingCards = ({
       setStart(true);
     }
   }, [direction, speed]);
-
-  const getDirection = () => {
-    if (containerRef.current) {
-      if (direction === "left") {
-        containerRef.current.style.setProperty(
-          "--animation-direction",
-          "forwards"
-        );
-      } else {
-        containerRef.current.style.setProperty(
-          "--animation-direction",
-          "reverse"
-        );
-      }
-    }
-  };
-
-  const getSpeed = () => {
-    if (containerRef.current) {
-      if (speed === "fast") {
-        containerRef.current.style.setProperty("--animation-duration", "20s");
-      } else if (speed === "normal") {
-        containerRef.current.style.setProperty("--animation-duration", "40s");
-      } else {
-        containerRef.current.style.setProperty("--animation-duration", "80s");
-      }
-    }
-  };
-
-  useEffect(() => {
-    addAnimation();
-  }, [addAnimation]);
 
   return (
     <div

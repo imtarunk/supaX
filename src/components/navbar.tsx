@@ -43,21 +43,25 @@ const Navbar = async () => {
 
         {/* Level Indicator */}
         <div className="flex items-center space-x-2">
-          {/* <span className="bg-[#1A1A1A] rounded-lg px-2 py-1">#9</span> */}
           {user?.image && (
             <HoverCard>
-              <HoverCardTrigger>
-                <a href="/dashboard" className="z-20 cursor-pointer">
-                  <Image
-                    src={user.image}
-                    alt="Profile"
-                    width={40}
-                    height={40}
-                    className="rounded-full hover:scale-110 transition-all duration-300 cursor-pointer z-20"
-                  />
-                </a>
+              <HoverCardTrigger asChild>
+                <div className="cursor-pointer">
+                  <a href="/dashboard">
+                    <div className="relative w-10 h-10">
+                      <Image
+                        src={user.image}
+                        alt={user.name || "Profile"}
+                        fill
+                        sizes="(max-width: 40px) 100vw, 40px"
+                        className="rounded-full object-cover hover:scale-110 transition-all duration-300 cursor-pointer z-20"
+                        priority
+                      />
+                    </div>
+                  </a>
+                </div>
               </HoverCardTrigger>
-              <HoverCardContent className="absolute top-5 right-0 m-0 p-0 border-gray-800 ">
+              <HoverCardContent className="absolute top-5 right-0 m-0 p-0 border-gray-800">
                 <SettingsCard user={user} />
               </HoverCardContent>
             </HoverCard>

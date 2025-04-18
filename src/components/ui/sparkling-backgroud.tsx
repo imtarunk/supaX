@@ -10,15 +10,14 @@ interface Sparkle {
   y: number;
   delay: number;
   duration: number;
-  moveX: number; // Add this for horizontal movement
-  moveY: number; // Add this for vertical movement
+  moveX: number;
+  moveY: number;
 }
 
 export default function SparklingBackground() {
   const [sparkles, setSparkles] = useState<Sparkle[]>([]);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
-  // Update dimensions on window resize
   useEffect(() => {
     const updateDimensions = () => {
       setDimensions({
@@ -27,65 +26,48 @@ export default function SparklingBackground() {
       });
     };
 
-    // Set initial dimensions
     updateDimensions();
-
-    // Add event listener
     window.addEventListener("resize", updateDimensions);
 
-    // Clean up
     return () => window.removeEventListener("resize", updateDimensions);
   }, []);
 
-  // Generate new sparkles periodically
   useEffect(() => {
-    if (dimensions.width === 0) return;
+    const generateSparkles = (count: number) => {
+      const newSparkles: Sparkle[] = [];
+      for (let i = 0; i < count; i++) {
+        newSparkles.push({
+          id: Math.random(),
+          size: Math.random() * 3 + 1,
+          x: Math.random() * dimensions.width,
+          y: Math.random() * dimensions.height,
+          delay: Math.random() * 2,
+          duration: Math.random() * 3 + 2,
+          moveX: (Math.random() - 0.5) * 2,
+          moveY: (Math.random() - 0.5) * 2,
+        });
+      }
+      setSparkles((current) => [...current, ...newSparkles]);
+    };
 
-    // Initial sparkles
     generateSparkles(50);
-
-    // Add new sparkles every second
-    const interval = setInterval(() => {
-      generateSparkles(8);
-    }, 1000);
+    const interval = setInterval(() => generateSparkles(10), 1000);
 
     return () => clearInterval(interval);
   }, [dimensions]);
 
-  // Remove sparkles that have been visible for their duration
   useEffect(() => {
     if (sparkles.length === 0) return;
 
     const timeout = setTimeout(() => {
-      setSparkles((currentSparkles) =>
-        currentSparkles.slice(Math.max(0, currentSparkles.length - 100))
-      );
+      setSparkles((s) => s.slice(Math.max(0, s.length - 100)));
     }, 5000);
 
     return () => clearTimeout(timeout);
   }, [sparkles]);
 
-  const generateSparkles = (count: number) => {
-    const newSparkles: Sparkle[] = [];
-
-    for (let i = 0; i < count; i++) {
-      newSparkles.push({
-        id: Date.now() + i,
-        size: Math.random() * 4 + 0.5, // 0.5-4.5px (smaller minimum, larger maximum)
-        x: Math.random() * dimensions.width,
-        y: Math.random() * dimensions.height,
-        delay: Math.random() * 2, // 0-2s delay
-        duration: Math.random() * 2 + 2, // 2-4s duration
-        moveX: (Math.random() - 0.5) * 50, // Random movement between -25 and 25
-        moveY: (Math.random() - 0.5) * 50, // Random movement between -25 and 25
-      });
-    }
-
-    setSparkles((currentSparkles) => [...currentSparkles, ...newSparkles]);
-  };
-
   return (
-    <div className="fixed inset-0 bg-transparent overflow-hidden">
+    <div className="fixed top-0 left-0 w-full h-full ">
       <AnimatePresence>
         {sparkles.map((sparkle) => (
           <motion.div
