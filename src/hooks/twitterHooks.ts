@@ -1,5 +1,4 @@
 import axios, { AxiosResponse } from "axios";
-import dotenv from "dotenv";
 import OAuth from "oauth-1.0a";
 import crypto from "crypto";
 
@@ -61,8 +60,6 @@ const showToast = (
   };
   console.log(`${colors[type]}[${type.toUpperCase()}] ${message}\x1b[0m`);
 };
-
-dotenv.config();
 
 const data = {
   id: "1684871141956239361",
