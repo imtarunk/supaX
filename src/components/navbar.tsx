@@ -9,6 +9,7 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import SettingsCard from "./hoverSettingCard";
+import WalletButton from "./WalletButton";
 
 const Navbar = async () => {
   const user = await getCurrentUser();
@@ -16,7 +17,7 @@ const Navbar = async () => {
   return (
     <nav className="relative z-10 flex items-center justify-between px-4 py-5 bg-[#0F0F0F] text-white mt-5">
       <div className="flex items-center space-x-4">
-        {/* Logos */}
+        {/* Logos */} <WalletButton />
         <div className="flex items-center space-x-2">
           <span className="text-xl font-bold">Ordzaar</span>
           <span className="text-xl font-bold">OdinSwap</span>
@@ -39,7 +40,6 @@ const Navbar = async () => {
         </button>
 
         {/* XP Display */}
-
         <button className=" border border-gray-800-500 text-black px-3 py-3 rounded-full tracking-widest uppercase font-bold bg-transparent  dark:text-neutral-200 transition duration-200 flex items-center space-x-2">
           <RiFlashlightFill className="text-yellow-500" />
           <span>11,121 XP</span>
