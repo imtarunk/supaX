@@ -3,16 +3,19 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/auth.config";
 
 export async function getCurrentUser() {
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user?.id) {
+    return null;
+  }
+
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.id) {
-      return null;
-    }
-
     const user = await prisma.user.findUnique({
       where: {
         id: session.user.id,
+      },
+      include: {
+        twitterAccount: true,
       },
     });
 
@@ -20,62 +23,47 @@ export async function getCurrentUser() {
       return null;
     }
 
-    // Check if tokens are expired
-    if (user.tokenExpires && user.tokenExpires < new Date()) {
-      if (user.refreshToken) {
-        try {
-          // Refresh the tokens
-          const tokenResponse = await fetch(
-            `https://${process.env.AUTH0_DOMAIN}/oauth/token`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                grant_type: "refresh_token",
-                client_id: process.env.AUTH0_CLIENT_ID,
-                client_secret: process.env.AUTH0_CLIENT_SECRET,
-                refresh_token: user.refreshToken,
-              }),
-            }
-          );
+    // Check if Twitter tokens are expired
+    if (
+      user.twitterAccount?.expiresAt &&
+      new Date() > user.twitterAccount.expiresAt
+    ) {
+      // Attempt to refresh Twitter tokens
+      try {
+        const response = await fetch("https://api.twitter.com/2/oauth2/token", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: new URLSearchParams({
+            grant_type: "refresh_token",
+            refresh_token: user.twitterAccount.refreshToken,
+            client_id: process.env.TWITTER_CLIENT_ID!,
+          }),
+        });
 
-          const tokens = await tokenResponse.json();
-          console.log("Tokens refreshed:", tokens);
+        const data = await response.json();
 
-          // Calculate new expiration time
-          const tokenExpires = new Date();
-          tokenExpires.setSeconds(
-            tokenExpires.getSeconds() + tokens.expires_in
-          );
-
-          // Update user with new tokens
-          const updatedUser = await prisma.user.update({
-            where: {
-              id: user.id,
-            },
+        if (data.access_token) {
+          // Update user's tokens in database
+          await prisma.twitterAccount.update({
+            where: { userId: user.id },
             data: {
-              accessToken: tokens.access_token,
-              idToken: tokens.id_token,
-              refreshToken: tokens.refresh_token,
-              tokenExpires: tokenExpires,
+              accessToken: data.access_token,
+              refreshToken: data.refresh_token,
+              expiresAt: new Date(Date.now() + data.expires_in * 1000),
             },
           });
-
-          console.log("User tokens updated:", updatedUser);
-          return updatedUser;
-        } catch (error) {
-          console.error("Error refreshing tokens:", error);
-          return null;
         }
+      } catch (error) {
+        console.error("Error refreshing Twitter tokens:", error);
+        // If token refresh fails, we'll still return the user but they may need to re-authenticate
       }
-      return null;
     }
 
     return user;
   } catch (error) {
-    console.error("Error getting current user:", error);
+    console.error("Error fetching user:", error);
     return null;
   }
 }

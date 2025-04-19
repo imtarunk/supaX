@@ -3,9 +3,7 @@
 import type { Metadata } from "next";
 import { Space_Mono } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "../components/theme.provider";
-import SparklingBackground from "@/components/ui/sparkling-backgroud";
-import { Toaster } from "@/components/ui/sonner";
+import { Providers } from "../components/providers";
 
 const spaceMono = Space_Mono({
   subsets: ["latin"],
@@ -29,16 +27,7 @@ export default function RootLayout({
       <body
         className={`${spaceMono.variable} font-mono bg-black text-white antialiased`}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-          <Toaster />
-          <SparklingBackground />
-        </ThemeProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

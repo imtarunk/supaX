@@ -2,7 +2,6 @@
 
 import { User } from "@prisma/client";
 import Image from "next/image";
-import { FaGift } from "react-icons/fa";
 import { IoFlame } from "react-icons/io5";
 import { RiFlashlightFill } from "react-icons/ri";
 import {
@@ -15,6 +14,7 @@ import WalletButton from "./WalletButton";
 import { useState } from "react";
 import { useEffect } from "react";
 import axios from "axios";
+import { ClaimRewardButton } from "./ClaimRewardButton";
 
 interface NavbarProps {
   user: User | null;
@@ -43,10 +43,10 @@ const Navbar = ({ user }: NavbarProps) => {
       </div>
 
       <div className="flex items-center space-x-4">
-        {/* Gift Button */}
-        <button className="flex items-center justify-center bg-transparent border border-red-500 rounded-lg px-3 py-1 shadow-[0_0_10px_2px_rgba(255,0,0,0.8)] animate-shake hover:animate-shake hover:scale-110 transition-all duration-300">
-          <FaGift className="text-red-500 animate-slide-x w-5 h-5" />
-        </button>
+        {/* Claim Reward Button */}
+        <div className="w-32">
+          <ClaimRewardButton />
+        </div>
 
         {/* Streak Counter */}
         <button className="relative inline-flex h-12 overflow-hidden rounded-full p-[1px] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50">

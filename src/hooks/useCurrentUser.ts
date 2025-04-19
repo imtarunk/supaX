@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 
 export function useCurrentUser() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -17,13 +17,16 @@ export function useCurrentUser() {
           setUser(data);
         } catch (error) {
           console.error("Error fetching user:", error);
+          setUser(null);
         }
+      } else {
+        setUser(null);
       }
       setLoading(false);
     }
 
     fetchUser();
-  }, [session]);
+  }, [session, status]);
 
   return { user, loading };
 }

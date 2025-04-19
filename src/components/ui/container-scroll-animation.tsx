@@ -96,7 +96,7 @@ export const Card = ({
           src="/image.png"
           fill
           alt="bannerImage"
-          className="object-cover border-8 rounded-2xl"
+          className="object-fill border-10 rounded-4xl"
         />
       </div>
     </motion.div>

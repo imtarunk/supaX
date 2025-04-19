@@ -14,22 +14,23 @@ datasource db {
 }
 
 model User {
-  id            String     @id @default(cuid())
-  name          String?
-  email         String?    @unique
-  emailVerified DateTime?
-  image         String?
-  twitterId     String?    @unique
-  accessToken   String?
-  idToken       String?
-  refreshToken  String?
-  points        Int        @default(0)
-  tokenExpires  DateTime?
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
-  accounts      Account[]
-  sessions      Session[]
-  UserTask      UserTask[]
+  id             String          @id @default(cuid())
+  name           String?
+  email          String?         @unique
+  emailVerified  DateTime?
+  image          String?
+  twitterId      String?         @unique
+  accessToken    String?
+  idToken        String?
+  refreshToken   String?
+  points         Int             @default(0)
+  tokenExpires   DateTime?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  accounts       Account[]
+  sessions       Session[]
+  UserTask       UserTask[]
+  twitterAccount TwitterAccount?
 }
 
 model Account {
@@ -78,4 +79,16 @@ model UserTask {
   updatedAt DateTime @updatedAt
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+}
+
+model TwitterAccount {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  twitterId    String   @unique
+  accessToken  String
+  refreshToken String
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

@@ -5,9 +5,16 @@ import { ContainerScroll } from "./ui/container-scroll-animation";
 import { InfiniteMovingCards } from "./ui/infinite-moving-cards";
 import { WobbleCard } from "./ui/wobble-card";
 import { cn } from "@/lib/utils";
+import { LoginIcon } from "./icons/icons";
+import { useRouter } from "next/navigation";
 
-const recipientId = "1622174627924672513";
-const message = "Hey! I'm interested in your product 🙌";
+const recipientId = "1396073250019500032";
+const message = `Hey fren! 👋
+Welcome to Supax v1 devlopment version — your new web3 social playground 🌐💬
+Complete simple tasks, engage with the community, and earn SOL along the way! 🚀
+We’re just getting started, and you’re early. Let’s build together. 🛠️
+
+`;
 const encodedMessage = encodeURIComponent(message);
 const dmUrl = `https://twitter.com/messages/compose?recipient_id=${recipientId}&text=${encodedMessage}`;
 
@@ -43,43 +50,52 @@ const ContactButton = ({
 };
 
 const LandingPage = () => {
+  const router = useRouter();
   return (
-    <div className="landing-page relative bg-black min-h-screen text-white font-mono overflow-hidden">
-      {/* Sparkling background layer */}
+    <div className="relative bg-black min-h-screen text-white font-mono overflow-hidden">
+      {/* Sparkling background layer - you can add this back if you had one */}
 
       {/* Foreground content */}
       <div className="relative z-10">
         {/* Floating Contact Button */}
+        <div
+          className="fixed top-4 left-4 z-50 md:absolute"
+          onClick={() => router.push("/dashboard")}
+        >
+          <LoginIcon />
+        </div>
         <div className="fixed top-4 right-4 z-50 md:absolute">
           <ContactButton size="sm" />
         </div>
 
         {/* Hero Section */}
-        <ContainerScroll
-          titleComponent={
-            <div className="flex items-center justify-center flex-col text-center px-4 py-16 md:py-24">
-              <h3 className="text-base md:text-xl font-semibold mb-4 md:mb-6">
-                SuperFi by{" "}
-                <span className="text-yellow-400 font-bold">[LOGO]</span>{" "}
-                Superstellar
-              </h3>
+        <div className="w-full">
+          <ContainerScroll
+            titleComponent={
+              <div className="flex items-center justify-center flex-col text-center px-6 py-16 md:py-24">
+                <h3 className="text-base md:text-xl font-semibold mb-4 md:mb-6">
+                  SuperFi by{" "}
+                  <span className="text-yellow-400 font-bold">[LOGO]</span>{" "}
+                  Superstellar
+                </h3>
 
-              <h1 className="text-xl md:text-3xl tracking-widest uppercase leading-relaxed md:leading-loose">
-                <span className="font-extrabold">S</span>UPERCHARGE{" "}
-                <span className="font-extrabold">Y</span>OUR{" "}
-                <span className="font-extrabold">C</span>RYPTO{" "}
-                <span className="font-extrabold">C</span>OMMUNITY
-              </h1>
+                <h1 className="text-xl md:text-3xl tracking-widest uppercase leading-relaxed md:leading-loose">
+                  <span className="font-extrabold">S</span>UPERCHARGE{" "}
+                  <span className="font-extrabold">Y</span>OUR{" "}
+                  <span className="font-extrabold">C</span>RYPTO{" "}
+                  <span className="font-extrabold">C</span>OMMUNITY
+                </h1>
 
-              <h1 className="text-3xl sm:text-5xl md:text-8xl bg-clip-text text-transparent bg-gradient-to-b from-white to-neutral-600 font-bold mt-6 md:mt-8">
-                EFFORTLESSLY
-              </h1>
-            </div>
-          }
-        />
+                <h1 className="text-3xl sm:text-5xl md:text-8xl bg-clip-text text-transparent bg-gradient-to-b from-white to-neutral-600 font-bold mt-6 md:mt-8">
+                  EFFORTLESSLY
+                </h1>
+              </div>
+            }
+          />
+        </div>
 
         {/* Description Section */}
-        <div className="max-w-5xl mx-auto px-4 md:px-6 py-12 md:py-16 text-center">
+        <div className="max-w-5xl mx-auto px-6 md:px-6 py-12 md:py-16 text-center">
           <p className="text-lg sm:text-xl md:text-2xl tracking-wide leading-relaxed uppercase">
             <span className="font-bold">S</span>UPERFI helps{" "}
             <span className="font-bold">N</span>FT projects, meme coins, and new
@@ -100,7 +116,7 @@ const LandingPage = () => {
         </div>
 
         {/* Why Choose Section */}
-        <section className="py-16 md:py-24 px-4 md:px-6 text-center bg-black/50">
+        <section className="py-16 md:py-24 px-6 md:px-6 text-center bg-black/50">
           <h2 className="text-xl md:text-3xl tracking-widest uppercase mb-8">
             WHY <span className="font-normal">CHOOSE</span>{" "}
             <span className="font-bold">SUPERFI?</span>
@@ -113,7 +129,7 @@ const LandingPage = () => {
         </section>
 
         {/* Feature Cards */}
-        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 p-4 md:p-6 max-w-7xl mx-auto">
+        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6 md:p-6 max-w-7xl mx-auto">
           <WobbleCard containerClassName="bg-gradient-to-br from-neutral-900 to-black text-left col-span-1 md:col-span-2 p-6 rounded-xl">
             <h3 className="text-xl md:text-2xl font-semibold tracking-widest">
               AUTOMATED ENGAGEMENT TRACKING
@@ -176,7 +192,7 @@ const LandingPage = () => {
         </section>
 
         {/* Call to Action */}
-        <section className="py-16 md:py-24 px-4 md:px-6 text-center bg-black/50">
+        <section className="py-16 md:py-24 px-6 md:px-6 text-center bg-black/50">
           <h2 className="text-xl md:text-3xl tracking-widest uppercase mb-8">
             Ready to Supercharge Your Community?
           </h2>
@@ -188,7 +204,7 @@ const LandingPage = () => {
           </p>
 
           <div className="mt-12">
-            <ContactButton />
+            <ContactButton size="lg" />
           </div>
         </section>
       </div>
