@@ -1,10 +1,8 @@
 import type { NextAuthOptions } from "next-auth";
+import type { AdapterUser } from "next-auth/adapters";
 import TwitterProvider from "next-auth/providers/twitter";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
-import { JWT } from "next-auth/jwt";
-import { Session } from "next-auth";
-import { Account } from "next-auth";
 
 // Extend the Session type to include our custom properties
 declare module "next-auth" {
@@ -22,6 +20,11 @@ interface TwitterProfile {
     username: string;
     profile_image_url: string;
   };
+}
+
+// Extend AdapterUser to include our custom fields
+interface CustomAdapterUser extends Omit<AdapterUser, "id"> {
+  twitterId?: string;
 }
 
 // Rate limiting configuration
@@ -53,8 +56,46 @@ const checkRateLimit = async () => {
   RATE_LIMIT.currentRequests++;
 };
 
+// Custom adapter to handle user creation
+const customAdapter = {
+  ...PrismaAdapter(prisma),
+  createUser: async (data: CustomAdapterUser) => {
+    try {
+      // First try to find the user by twitterId
+      const existingUser = await prisma.user.findUnique({
+        where: { twitterId: data.twitterId || "" },
+      });
+
+      if (existingUser) {
+        // If user exists, update their information
+        return prisma.user.update({
+          where: { twitterId: data.twitterId || "" },
+          data: {
+            name: data.name,
+            image: data.image,
+            email: data.email || "",
+          },
+        }) as Promise<AdapterUser>;
+      }
+
+      // If user doesn't exist, create a new one
+      return prisma.user.create({
+        data: {
+          name: data.name,
+          image: data.image,
+          twitterId: data.twitterId || "",
+          email: data.email || "",
+        },
+      }) as Promise<AdapterUser>;
+    } catch (error) {
+      console.error("Error in createUser:", error);
+      throw error;
+    }
+  },
+};
+
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
+  adapter: customAdapter,
   providers: [
     TwitterProvider({
       clientId: process.env.TWITTER_CLIENT_ID as string,
@@ -78,34 +119,7 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async signIn({ user, account }) {
-      if (account?.provider === "twitter") {
-        try {
-          await checkRateLimit();
-
-          // Check if user exists with this Twitter ID
-          const existingUser = await prisma.user.findUnique({
-            where: { twitterId: user.id },
-          });
-
-          if (!existingUser) {
-            // Create new user with Twitter ID
-            await prisma.user.create({
-              data: {
-                name: user.name,
-                image: user.image,
-                twitterId: user.id,
-              },
-            });
-          }
-        } catch (error) {
-          console.error("Error in signIn callback:", error);
-          return false;
-        }
-      }
-      return true;
-    },
-    async jwt({ token, account }: { token: JWT; account: Account | null }) {
+    async jwt({ token, account }) {
       if (account?.access_token) {
         try {
           await checkRateLimit();
@@ -118,7 +132,7 @@ export const authOptions: NextAuthOptions = {
       }
       return token;
     },
-    async session({ session, token }: { session: Session; token: JWT }) {
+    async session({ session, token }) {
       if (session.user) {
         try {
           await checkRateLimit();
@@ -131,10 +145,27 @@ export const authOptions: NextAuthOptions = {
       }
       return session;
     },
+    async redirect({ url, baseUrl }) {
+      // If the URL is relative, prepend the base URL
+      if (url.startsWith("/")) {
+        return `${baseUrl}${url}`;
+      }
+      // If the URL is from the same origin, allow it
+      else if (new URL(url).origin === baseUrl) {
+        return url;
+      }
+      // Default to dashboard
+      return `${baseUrl}/dashboard`;
+    },
   },
   pages: {
     signIn: "/auth/signin",
     error: "/auth/error",
   },
+  session: {
+    strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+  },
+  secret: process.env.NEXTAUTH_SECRET,
   debug: true,
 };

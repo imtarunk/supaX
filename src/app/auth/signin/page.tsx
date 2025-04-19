@@ -1,12 +1,13 @@
 "use client";
 
 import { signIn } from "next-auth/react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 
 function SignInContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
   const error = searchParams.get("error");
   const [isLoading, setIsLoading] = useState(true);
@@ -15,19 +16,44 @@ function SignInContent() {
 
   useEffect(() => {
     const handleSignIn = async () => {
+      console.log("Starting sign in process...");
+      console.log("Callback URL:", callbackUrl);
+
       if (!error) {
-        await signIn("twitter", { callbackUrl });
+        try {
+          console.log("Initiating Twitter sign in...");
+          const result = await signIn("twitter", {
+            callbackUrl,
+            redirect: false,
+          });
+
+          if (result?.ok) {
+            router.push(callbackUrl);
+          }
+        } catch (error) {
+          console.error("Error during sign in:", error);
+        }
       } else if (error === "OAuthCallback" && retryCount < maxRetries) {
+        console.log(
+          `Retrying sign in (attempt ${retryCount + 1}/${maxRetries})...`
+        );
         // Wait for 5 seconds before retrying
         await new Promise((resolve) => setTimeout(resolve, 5000));
         setRetryCount((prev) => prev + 1);
-        await signIn("twitter", { callbackUrl });
+        const result = await signIn("twitter", {
+          callbackUrl,
+          redirect: false,
+        });
+
+        if (result?.ok) {
+          router.push(callbackUrl);
+        }
       }
       setIsLoading(false);
     };
 
     handleSignIn();
-  }, [callbackUrl, error, retryCount]);
+  }, [callbackUrl, error, retryCount, router]);
 
   if (error) {
     return (

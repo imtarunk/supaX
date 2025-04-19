@@ -9,9 +9,14 @@ type User = {
 };
 
 const SettingsCard = ({ user }: { user: User }) => {
-  const handlelogout = () => {
-    signOut({ callbackUrl: "/" });
-    toast.success("Logged out successfully");
+  const handlelogout = async () => {
+    try {
+      await signOut({ callbackUrl: "/" });
+      toast.success("Logged out successfully");
+    } catch (error: unknown) {
+      console.error("Logout error:", error);
+      toast.error("Failed to logout");
+    }
   };
   return (
     <div className="bg-black rounded-lg max-w-lg m-0 p-0">
@@ -63,7 +68,7 @@ const SettingsCard = ({ user }: { user: User }) => {
           className="bg-transparent border border-green-400 text-green-400 hover:bg-green-400/10 px-6 py-2 rounded-lg font-medium mb-5"
           onClick={handlelogout}
         >
-          Unlink
+          Sign Out
         </button>
       </div>
     </div>
