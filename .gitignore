@@ -16,9 +16,15 @@
 /coverage
 
 # next.js
-/.next/
+.next/
+.next/*
+!.next/cache
+.next/cache/*
+!.next/cache/webpack
+.next/cache/webpack/*
+!.next/cache/webpack/client-development
+!.next/cache/webpack/server-development
 /out/
-.next
 # production
 /build
 
@@ -41,3 +47,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
