@@ -166,6 +166,7 @@ export default function TaskCard({
               // Update points in database
               await axios.post("/api/user/updatepoints", {
                 taskId: taskId,
+                points: points,
               });
               toast(`Task completed! ${points} Points added to your account! `);
               setLoading(false);

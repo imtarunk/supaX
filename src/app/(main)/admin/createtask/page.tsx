@@ -16,7 +16,6 @@ import { taskSchema } from "@/app/schema/z";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import axios from "axios";
-import { useRouter } from "next/navigation";
 import {
   Select,
   SelectContent,
@@ -24,9 +23,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { toast } from "sonner";
 
 export default function AdminPage() {
-  const router = useRouter();
   const form = useForm<z.infer<typeof taskSchema>>({
     resolver: zodResolver(taskSchema),
     defaultValues: {
@@ -50,15 +49,17 @@ export default function AdminPage() {
 
   const onSubmit = async (values: z.infer<typeof taskSchema>) => {
     try {
-      await axios.post("/api/admin/createtask", values);
-      router.push("/dashboard");
+      const res = await axios.post("/api/admin/createtask", values);
+      if (res.status === 200) {
+        toast("Task created successfully");
+      }
     } catch (error) {
       console.error("Error creating task:", error);
     }
   };
 
   return (
-    <div className="min-h-screen  text-gray-100 flex items-center justify-center px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen  text-gray-100 flex items-center justify-center px-4 sm:px-6 lg:px-8 z-10 relative">
       <div className="w-full max-w-2xl">
         <div className="border border-gray-800 rounded-xl p-4 sm:p-8 shadow-lg shadow-blue-900/10">
           <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-white text-center">
@@ -133,30 +134,105 @@ export default function AdminPage() {
                     <FormLabel className="text-gray-300 text-sm sm:text-base">
                       Task Content
                     </FormLabel>
-                    <FormControl>
-                      <Input
-                        value={field.value[0]?.text || ""}
-                        onChange={(e) => {
-                          const newContent = [...field.value];
-                          newContent[0] = {
-                            ...newContent[0],
-                            text: e.target.value,
-                          };
-                          field.onChange(newContent);
-                        }}
-                        placeholder={
-                          form.watch("task.0.type") === "tweet"
-                            ? "Enter tweet content"
-                            : form.watch("task.0.type") === "follow"
-                            ? "Enter Twitter handle to follow"
-                            : "Enter tweet URL to like"
-                        }
-                        className="bg-gray-800 border-gray-700 text-gray-100 focus:border-blue-500 focus:ring-blue-500 placeholder:text-gray-500 h-10 sm:h-12 text-sm sm:text-base"
-                      />
-                    </FormControl>
+                    {form.watch("task.0.type") === "tweet" ? (
+                      <div className="space-y-4">
+                        <FormControl>
+                          <Input
+                            placeholder="Enter tweet text"
+                            value={field.value[0]?.text || ""}
+                            onChange={(e) => {
+                              const newContent = [...field.value];
+                              newContent[0] = {
+                                ...newContent[0],
+                                text: e.target.value,
+                              };
+                              field.onChange(newContent);
+                            }}
+                            className="bg-gray-800 border-gray-700 text-gray-100 focus:border-blue-500 focus:ring-blue-500 placeholder:text-gray-500 h-10 sm:h-12 text-sm sm:text-base"
+                          />
+                        </FormControl>
+                        <FormControl>
+                          <Input
+                            placeholder="Enter URL (optional)"
+                            value={field.value[0]?.url || ""}
+                            onChange={(e) => {
+                              const newContent = [...field.value];
+                              newContent[0] = {
+                                ...newContent[0],
+                                url: e.target.value,
+                              };
+                              field.onChange(newContent);
+                            }}
+                            className="bg-gray-800 border-gray-700 text-gray-100 focus:border-blue-500 focus:ring-blue-500 placeholder:text-gray-500 h-10 sm:h-12 text-sm sm:text-base"
+                          />
+                        </FormControl>
+                        <FormControl>
+                          <Input
+                            placeholder="Enter hashtags (optional)"
+                            value={field.value[0]?.hashtags || ""}
+                            onChange={(e) => {
+                              const newContent = [...field.value];
+                              newContent[0] = {
+                                ...newContent[0],
+                                hashtags: e.target.value,
+                              };
+                              field.onChange(newContent);
+                            }}
+                            className="bg-gray-800 border-gray-700 text-gray-100 focus:border-blue-500 focus:ring-blue-500 placeholder:text-gray-500 h-10 sm:h-12 text-sm sm:text-base"
+                          />
+                        </FormControl>
+                        <FormControl>
+                          <Input
+                            placeholder="Enter via (optional)"
+                            value={field.value[0]?.via || ""}
+                            onChange={(e) => {
+                              const newContent = [...field.value];
+                              newContent[0] = {
+                                ...newContent[0],
+                                via: e.target.value,
+                              };
+                              field.onChange(newContent);
+                            }}
+                            className="bg-gray-800 border-gray-700 text-gray-100 focus:border-blue-500 focus:ring-blue-500 placeholder:text-gray-500 h-10 sm:h-12 text-sm sm:text-base"
+                          />
+                        </FormControl>
+                      </div>
+                    ) : form.watch("task.0.type") === "follow" ? (
+                      <FormControl>
+                        <Input
+                          value={field.value[0]?.text || ""}
+                          onChange={(e) => {
+                            const newContent = [...field.value];
+                            newContent[0] = {
+                              ...newContent[0],
+                              text: e.target.value,
+                            };
+                            field.onChange(newContent);
+                          }}
+                          placeholder="Enter Twitter handle to follow"
+                          className="bg-gray-800 border-gray-700 text-gray-100 focus:border-blue-500 focus:ring-blue-500 placeholder:text-gray-500 h-10 sm:h-12 text-sm sm:text-base"
+                        />
+                      </FormControl>
+                    ) : (
+                      <FormControl>
+                        <Input
+                          value={field.value[0]?.text || ""}
+                          onChange={(e) => {
+                            const newContent = [...field.value];
+                            newContent[0] = {
+                              ...newContent[0],
+                              text: e.target.value,
+                            };
+                            field.onChange(newContent);
+                          }}
+                          placeholder="Enter tweet URL to like"
+                          className="bg-gray-800 border-gray-700 text-gray-100 focus:border-blue-500 focus:ring-blue-500 placeholder:text-gray-500 h-10 sm:h-12 text-sm sm:text-base"
+                        />
+                      </FormControl>
+                    )}
                     <FormDescription className="text-gray-500 text-xs sm:text-sm">
                       {form.watch("task.0.type") === "tweet"
-                        ? "The content of the tweet"
+                        ? "Enter the tweet content and optional fields"
                         : form.watch("task.0.type") === "follow"
                         ? "The Twitter handle to follow (without @)"
                         : "The URL of the tweet to like"}
