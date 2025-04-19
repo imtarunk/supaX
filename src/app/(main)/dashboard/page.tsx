@@ -44,7 +44,7 @@ export default async function Dashboard() {
 
   return (
     <div className="min-h-screen text-white z-10 relative">
-      <Navbar />
+      <Navbar user={user} />
 
       <div className="container mx-auto px-4 py-6">
         <h1 className="text-2xl sm:text-3xl font-bold mb-4">Dashboard</h1>

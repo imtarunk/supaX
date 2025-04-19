@@ -2,7 +2,6 @@ import axios, { AxiosResponse } from "axios";
 import dotenv from "dotenv";
 import OAuth from "oauth-1.0a";
 import crypto from "crypto";
-
 // Type declarations for oauth-1.0a
 declare module "oauth-1.0a" {
   interface OAuthOptions {
@@ -16,12 +15,27 @@ declare module "oauth-1.0a" {
 
   class OAuth {
     constructor(options: OAuthOptions);
-    toHeader(data: any): { [key: string]: string };
+    toHeader(data: { url: string; method: string }): { [key: string]: string };
     authorize(
       request_data: { url: string; method: string },
       token?: { key: string; secret: string }
-    ): any;
+    ): { oauth_token: string; oauth_token_secret: string };
   }
+}
+
+interface TwitterError {
+  response?: {
+    data: {
+      detail: string;
+    };
+  };
+  message: string;
+}
+
+interface TwitterMention {
+  text: string;
+  id: string;
+  created_at: string;
 }
 
 // Toast notification function
@@ -50,19 +64,6 @@ const CONSUMER_KEY = process.env.TWITTER_API_KEY;
 const CONSUMER_SECRET = process.env.TWITTER_API_SECRET;
 const ACCESS_TOKEN = process.env.TWITTER_ACCESS_TOKEN;
 const ACCESS_TOKEN_SECRET = process.env.TWITTER_ACCESS_TOKEN_SECRET;
-
-if (
-  !CONSUMER_KEY ||
-  !CONSUMER_SECRET ||
-  !ACCESS_TOKEN ||
-  !ACCESS_TOKEN_SECRET
-) {
-  showToast(
-    "Error: Twitter OAuth credentials are not set in environment variables",
-    "error"
-  );
-  process.exit(1);
-}
 
 // Rate limiting configuration
 const RATE_LIMIT = {
@@ -128,10 +129,10 @@ const processQueue = async () => {
 };
 
 // Initialize OAuth 1.0a
-const oauth = new OAuth({
+export const oauth = new OAuth({
   consumer: {
-    key: CONSUMER_KEY,
-    secret: CONSUMER_SECRET,
+    key: CONSUMER_KEY as string,
+    secret: CONSUMER_SECRET as string,
   },
   signature_method: "HMAC-SHA1",
   hash_function(base_string: string, key: string) {
@@ -151,8 +152,8 @@ const makeRequest = async (url: string): Promise<AxiosResponse> => {
 
         const oauthHeaders = oauth.toHeader(
           oauth.authorize(request_data, {
-            key: ACCESS_TOKEN,
-            secret: ACCESS_TOKEN_SECRET,
+            key: ACCESS_TOKEN as string,
+            secret: ACCESS_TOKEN_SECRET as string,
           })
         );
 
@@ -178,8 +179,8 @@ const makeRequest = async (url: string): Promise<AxiosResponse> => {
         }
 
         resolve(res);
-      } catch (error: any) {
-        if (error.response?.status === 429) {
+      } catch (error: unknown) {
+        if (axios.isAxiosError(error) && error.response?.status === 429) {
           // Rate limit exceeded, retry after delay
           const resetTime =
             parseInt(error.response.headers["x-rate-limit-reset"]) * 1000;
@@ -194,7 +195,12 @@ const makeRequest = async (url: string): Promise<AxiosResponse> => {
           requestQueue.unshift(requestFunction);
           processQueue();
         } else {
-          showToast(`Error: ${error.message}`, "error");
+          showToast(
+            `Error: ${
+              error instanceof Error ? error.message : "Unknown error"
+            }`,
+            "error"
+          );
           reject(error);
         }
       }
@@ -206,59 +212,77 @@ const makeRequest = async (url: string): Promise<AxiosResponse> => {
 };
 
 // Get user mentions with rate limiting
-const getMentions = async () => {
+export const getMentions = async (): Promise<TwitterMention[]> => {
   try {
+    console.log("---------------------here-at-hook---------- start--");
+
     showToast("Fetching mentions...", "info");
     const url = `https://api.twitter.com/2/users/${data.id}/mentions`;
-    const res = await makeRequest(url);
-    console.log("Mentions:", res.data);
+    const res = await axios.get(url);
+    console.log(res.data);
+    console.log("---------------------here-at-hook---------- end--");
+
     showToast("Mentions fetched successfully!", "info");
-  } catch (error: any) {
-    if (error.response) {
-      showToast(`Twitter API Error: ${error.response.data.detail}`, "error");
+    return res.data.data || [];
+  } catch (error) {
+    const twitterError = error as TwitterError;
+    if (twitterError.response) {
+      showToast(
+        `Twitter API Error: ${twitterError.response.data.detail}`,
+        "error"
+      );
     } else {
-      showToast(`Error fetching mentions: ${error.message}`, "error");
+      showToast(`Error fetching mentions: ${twitterError.message}`, "error");
     }
+    return [];
   }
 };
 
-getMentions();
 // Get user's recent likes with rate limiting
-const getRecentLikes = async () => {
+export const getRecentLikes = async (): Promise<TwitterMention[]> => {
   try {
     showToast("Fetching recent likes...", "info");
     const url = `https://api.twitter.com/2/users/${data.id}/liked_tweets`;
     const res = await makeRequest(url);
-    console.log("Recent Likes:", res.data);
+    console.log(res.data);
     showToast("Recent likes fetched successfully!", "info");
-  } catch (error: any) {
-    if (error.response) {
-      showToast(`Twitter API Error: ${error.response.data.detail}`, "error");
+    return res.data.data || [];
+  } catch (error) {
+    const twitterError = error as TwitterError;
+    if (twitterError.response) {
+      showToast(
+        `Twitter API Error: ${twitterError.response.data.detail}`,
+        "error"
+      );
     } else {
-      showToast(`Error fetching recent likes: ${error.message}`, "error");
+      showToast(
+        `Error fetching recent likes: ${twitterError.message}`,
+        "error"
+      );
     }
+    return [];
   }
 };
 
-// getRecentLikes();
 // Get user's followers with rate limiting
-const getFollowers = async () => {
+export const getFollowers = async (): Promise<TwitterMention[]> => {
   try {
     showToast("Fetching followers...", "info");
     const url = `https://api.twitter.com/2/users/${data.id}/followers`;
     const res = await makeRequest(url);
-    console.log("Followers:", res.data);
+    console.log(res.data);
     showToast("Followers fetched successfully!", "info");
-  } catch (error: any) {
-    if (error.response) {
-      showToast(`Twitter API Error: ${error.response.data.detail}`, "error");
+    return res.data.data || [];
+  } catch (error) {
+    const twitterError = error as TwitterError;
+    if (twitterError.response) {
+      showToast(
+        `Twitter API Error: ${twitterError.response.data.detail}`,
+        "error"
+      );
     } else {
-      showToast(`Error fetching followers: ${error.message}`, "error");
+      showToast(`Error fetching followers: ${twitterError.message}`, "error");
     }
+    return [];
   }
 };
-
-// Export functions for individual use
-// getFollowers();
-
-export { getMentions, getRecentLikes, getFollowers };

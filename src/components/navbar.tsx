@@ -1,4 +1,6 @@
-import { getCurrentUser } from "@/lib/auth";
+"use client";
+
+import { User } from "@prisma/client";
 import Image from "next/image";
 import { FaGift } from "react-icons/fa";
 import { IoFlame } from "react-icons/io5";
@@ -11,9 +13,11 @@ import {
 import SettingsCard from "./hoverSettingCard";
 import WalletButton from "./WalletButton";
 
-const Navbar = async () => {
-  const user = await getCurrentUser();
+interface NavbarProps {
+  user: User | null;
+}
 
+const Navbar = ({ user }: NavbarProps) => {
   return (
     <nav className="relative z-10 flex items-center justify-between px-4 py-5 bg-[#0F0F0F] text-white mt-5">
       <div className="flex items-center space-x-4">
