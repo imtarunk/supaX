@@ -23,6 +23,7 @@ model User {
   accessToken   String?
   idToken       String?
   refreshToken  String?
+  points        Int        @default(0)
   tokenExpires  DateTime?
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt

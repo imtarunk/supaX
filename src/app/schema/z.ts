@@ -3,6 +3,7 @@
 import { z } from "zod";
 
 export const taskSchema = z.object({
+  id: z.string().optional(),
   icon: z.string().min(2).max(50),
   task: z.array(
     z.object({

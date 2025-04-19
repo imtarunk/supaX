@@ -140,6 +140,7 @@ export default async function Dashboard() {
                 task={task.task as unknown as TaskItem[]}
                 points={task.points}
                 completed={taskCompletionMap[task.id] || false}
+                taskId={task.id}
               />
             </div>
           ))}

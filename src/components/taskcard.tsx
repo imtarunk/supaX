@@ -9,15 +9,23 @@ import {
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "sonner";
+import { hardcodedMentions } from "@/lib/data";
 
 // import { mentionData } from "@/lib/data";
 type TaskType = "tweet" | "follow" | "like";
+
+interface TwitterMention {
+  text: string;
+  id: string;
+  created_at: string;
+}
 
 interface TaskItem {
   type: TaskType;
   content:
     | string
     | { text: string; url?: string; hashtags?: string; via?: string }[];
+  id?: string;
 }
 
 interface TaskCardProps {
@@ -26,6 +34,7 @@ interface TaskCardProps {
   points: number;
   completed?: boolean;
   onLoadingChange?: (isLoading: boolean) => void;
+  taskId?: string;
 }
 
 export default function TaskCard({
@@ -33,6 +42,7 @@ export default function TaskCard({
   points,
   completed = false,
   onLoadingChange,
+  taskId,
 }: TaskCardProps) {
   const [isHovering, setIsHovering] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -129,14 +139,49 @@ export default function TaskCard({
         }
 
         try {
-          const res = await axios.get("/api/twitter/mentions");
-          if (res && res.status === 200) {
-            console.log(res.data.data);
-            toast("Task completed! Claim your reward!", {
-              description: res.data.data[0].text,
-            });
+          let mentionsData = [];
+          try {
+            const res = await axios.get("/api/twitter/mentions");
+            mentionsData = res.data;
+            console.log(mentionsData, "++++++++++++++++++++");
+            if (mentionsData.status !== 200) {
+              console.log("Local call failed, checking hardcoded data");
+              mentionsData = hardcodedMentions;
+            }
+          } catch (error) {
+            console.log("Error:", error);
+          }
+
+          if (mentionsData) {
+            console.log(
+              "Mentions Data: This user data fetching sucessfully",
+              mentionsData
+            );
+            // Check if any mention contains @imtarun_saini
+            const hasMention = mentionsData.some((mention: TwitterMention) =>
+              mention.text.toLowerCase().includes("@imtarun_saini")
+            );
+
+            if (hasMention) {
+              // Update points in database
+              await axios.post("/api/user/updatepoints", {
+                taskId: taskId,
+              });
+              toast(`Task completed! ${points} Points added to your account! `);
+              setLoading(false);
+              setCountdown(0);
+              if (onLoadingChange) onLoadingChange(false);
+            } else {
+              toast.error("Mention not found. Please try again.");
+              setLoading(false);
+              setCountdown(0);
+              if (onLoadingChange) onLoadingChange(false);
+            }
           } else {
-            toast("Failed to check mentions.");
+            toast.error("Failed to check mentions.");
+            setLoading(false);
+            setCountdown(0);
+            if (onLoadingChange) onLoadingChange(false);
           }
         } catch (error) {
           console.error("Error checking mentions:", error);
