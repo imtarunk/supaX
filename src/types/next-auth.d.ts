@@ -7,6 +7,7 @@ declare module "next-auth" {
       name?: string | null;
       email?: string | null;
       image?: string | null;
+      twitterId?: string;
     };
     accessToken?: string;
     refreshToken?: string;
@@ -21,5 +22,6 @@ declare module "next-auth/jwt" {
     refreshToken?: string;
     idToken?: string;
     expiresAt?: number;
+    sub?: string;
   }
 }

@@ -1,23 +1,25 @@
-# Use the official Bun image
-FROM oven/bun:1 AS base
+# Build stage
+FROM node:22-alpine AS deps
 
-# Set working directory
 WORKDIR /app
 
-# Copy package.json
-COPY package.json ./
+# Install dependencies first (better caching)
+COPY package*.json .
 
-# Install dependencies
-RUN bun install
+# Copy environment file
+COPY .env* ./
 
-# Copy the rest of the application
 COPY . .
 
-# Generate Prisma Client
+RUN npm install -g bun
+RUN bun install
+
 RUN bunx prisma generate
 
-# Build the application
 RUN bun run build
 
+# Expose the port
+EXPOSE 3000
+
 # Start the application
-CMD ["bun", "start"]
+CMD ["bun", "run", "dev:docker"] 

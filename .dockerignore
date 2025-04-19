@@ -1,9 +1,0 @@
-node_modules
-.next
-.git
-
-
-.env.test
-README.md
-*.log
-.DS_Store 

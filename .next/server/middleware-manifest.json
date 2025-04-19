@@ -3,34 +3,35 @@
   "middleware": {
     "/": {
       "files": [
-        "server/edge-runtime-webpack.js",
-        "server/src/middleware.js"
+        "server/edge/chunks/_bfc433af._.js",
+        "server/edge/chunks/[root-of-the-server]__dc15d093._.js",
+        "server/edge/chunks/edge-wrapper_77c93068.js"
       ],
-      "name": "src/middleware",
+      "name": "middleware",
       "page": "/",
       "matchers": [
         {
-          "regexp": "^(?:\\/(_next\\/data\\/[^/]{1,}))?\\/dashboard(?:\\/((?:[^\\/#\\?]+?)(?:\\/(?:[^\\/#\\?]+?))*))?(\\.json)?[\\/#\\?]?$",
+          "regexp": "^(?:\\/(_next\\/data\\/[^/]{1,}))?\\/dashboard(?:\\/((?:[^\\/#\\?]+?)(?:\\/(?:[^\\/#\\?]+?))*))?(\\\\.json)?[\\/#\\?]?$",
           "originalSource": "/dashboard/:path*"
         },
         {
-          "regexp": "^(?:\\/(_next\\/data\\/[^/]{1,}))?\\/auth(?:\\/((?:[^\\/#\\?]+?)(?:\\/(?:[^\\/#\\?]+?))*))?(\\.json)?[\\/#\\?]?$",
+          "regexp": "^(?:\\/(_next\\/data\\/[^/]{1,}))?\\/auth(?:\\/((?:[^\\/#\\?]+?)(?:\\/(?:[^\\/#\\?]+?))*))?(\\\\.json)?[\\/#\\?]?$",
           "originalSource": "/auth/:path*"
         }
       ],
       "wasm": [],
       "assets": [],
       "env": {
-        "__NEXT_BUILD_ID": "jjeKK32rDSGhxAKMZHH0q",
+        "__NEXT_BUILD_ID": "development",
         "NEXT_SERVER_ACTIONS_ENCRYPTION_KEY": "uZPILR1xpOMGjph4gc0/I4ILPyJgjGCjpbjeGMQQ/EM=",
-        "__NEXT_PREVIEW_MODE_ID": "382458fb4785e5089990c019b46ad94c",
-        "__NEXT_PREVIEW_MODE_ENCRYPTION_KEY": "f6ea50868014b6b98c373a70bc0c39da23ab5a60978cf03482017b635d9e12cc",
-        "__NEXT_PREVIEW_MODE_SIGNING_KEY": "eed569375b3366a512f19313f32c114dc9fc0e541e7a38d8b2f2832299e9b169"
+        "__NEXT_PREVIEW_MODE_ID": "afb0347cb668a5e1fa0e9f49b3aaa2a9",
+        "__NEXT_PREVIEW_MODE_ENCRYPTION_KEY": "5c170660dc2a8a54cf4d51b9d3097b4afd6bbdc7b1815da719d981073640d461",
+        "__NEXT_PREVIEW_MODE_SIGNING_KEY": "dd792ee0326b0be704bb415e980a1742084bd769f6ce62c09c4a0dc397f70fac"
       }
     }
   },
-  "functions": {},
   "sortedMiddleware": [
     "/"
-  ]
+  ],
+  "functions": {}
 }

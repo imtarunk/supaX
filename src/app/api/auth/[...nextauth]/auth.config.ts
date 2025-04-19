@@ -25,6 +25,7 @@ interface TwitterProfile {
 // Extend AdapterUser to include our custom fields
 interface CustomAdapterUser extends Omit<AdapterUser, "id"> {
   twitterId?: string;
+  id?: string;
 }
 
 // Rate limiting configuration
@@ -132,10 +133,13 @@ export const authOptions: NextAuthOptions = {
       }
       return token;
     },
-    async session({ session, token }) {
+    async session({ session, token, user }) {
       if (session.user) {
         try {
           await checkRateLimit();
+          const customUser = user as CustomAdapterUser;
+          session.user.id = customUser?.id || token.sub || "";
+          session.user.twitterId = customUser?.twitterId || token.sub || "";
           session.accessToken = token.accessToken as string;
           session.refreshToken = token.refreshToken as string;
           session.expiresAt = token.expiresAt as number;

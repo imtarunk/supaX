@@ -10,9 +10,9 @@ export function useCurrentUser() {
 
   useEffect(() => {
     async function fetchUser() {
-      if (session?.user?.email) {
+      if (session?.user?.id) {
         try {
-          const response = await fetch("/api/user");
+          const response = await fetch("/api/user/getuser");
           const data = await response.json();
           setUser(data);
         } catch (error) {
