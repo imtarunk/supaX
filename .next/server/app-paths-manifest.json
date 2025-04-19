@@ -1,0 +1,16 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
+  "/api/admin/createtask/route": "app/api/admin/createtask/route.js",
+  "/api/create/tweet/route": "app/api/create/tweet/route.js",
+  "/api/task/like/route": "app/api/task/like/route.js",
+  "/api/twitter/mentions/route": "app/api/twitter/mentions/route.js",
+  "/api/user/getuser/route": "app/api/user/getuser/route.js",
+  "/favicon.ico/route": "app/favicon.ico/route.js",
+  "/api/user/updatepoints/route": "app/api/user/updatepoints/route.js",
+  "/auth/error/page": "app/auth/error/page.js",
+  "/auth/signin/page": "app/auth/signin/page.js",
+  "/(main)/page": "app/(main)/page.js",
+  "/(main)/dashboard/page": "app/(main)/dashboard/page.js",
+  "/(main)/admin/createtask/page": "app/(main)/admin/createtask/page.js"
+}
