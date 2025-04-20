@@ -15,7 +15,7 @@ import WalletButton from "./WalletButton";
 import { ClaimRewardButton } from "./ClaimRewardButton";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
-
+import AnimatedSupaXLogo from "./icons/icons";
 const DEFAULT_AVATAR = "/default-avatar.png";
 
 interface User {
@@ -25,6 +25,7 @@ interface User {
   image: string | null;
   points: number;
   twitterId?: string | null;
+  streakCount?: number;
 }
 
 const Navbar = ({ initialUser }: { initialUser: User | null }) => {
@@ -70,10 +71,7 @@ const Navbar = ({ initialUser }: { initialUser: User | null }) => {
           </div>
 
           <div className="flex items-center">
-            <span className="text-lg md:text-xl font-bold">Ordzaar</span>
-            <span className="hidden sm:inline md:text-xl font-bold ml-2">
-              OdinSwap
-            </span>
+            <AnimatedSupaXLogo />
           </div>
         </div>
 
@@ -86,7 +84,7 @@ const Navbar = ({ initialUser }: { initialUser: User | null }) => {
               <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]" />
               <span className="inline-flex h-full w-full cursor-pointer items-center justify-center  bg-slate-950 px-2 md:px-3 py-1 md:py-3 rounded-full tracking-wide md:tracking-widest uppercase font-bold  text-white backdrop-blur-3xl">
                 <IoFlame className="text-orange-500 text-2xl" />
-                <span className="ml-1 md:ml-2">2</span>
+                <span className="ml-1 md:ml-2">{initialUser?.streakCount}</span>
               </span>
             </button>
 

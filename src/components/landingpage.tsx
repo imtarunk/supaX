@@ -57,7 +57,7 @@ const LandingPage: React.FC = (): JSX.Element => {
 
   useEffect(() => {
     if (!session) {
-      router.push("/api/auth/signin");
+      router.push("/login");
     }
   }, [session, router]);
 
