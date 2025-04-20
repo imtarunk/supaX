@@ -13,14 +13,18 @@ function SignInContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [retryCount, setRetryCount] = useState(0);
   const maxRetries = 3;
+  const [isTelegram, setIsTelegram] = useState(false);
+
+  useEffect(() => {
+    // Check if we're in Telegram Mini App
+    setIsTelegram(!!window.Telegram?.WebApp?.initData);
+  }, []);
 
   useEffect(() => {
     const handleSignIn = async () => {
       console.log("Starting sign in process...");
       console.log("Callback URL:", callbackUrl);
-
-      // Check if we're in Telegram's in-app browser
-      const isTelegramBrowser = /Telegram/.test(navigator.userAgent);
+      console.log("Is Telegram Mini App:", isTelegram);
 
       if (!error) {
         try {
@@ -30,12 +34,25 @@ function SignInContent() {
             redirect: false,
           });
 
-          if (result?.ok) {
-            if (isTelegramBrowser) {
-              // For Telegram browser, we need to handle the redirect differently
-              window.location.href = result.url || callbackUrl;
+          if (result?.ok && result?.url) {
+            if (isTelegram) {
+              // For Telegram Mini App, open in external browser
+              console.log("Opening Twitter auth in external browser...");
+              window.open(result.url, "_blank");
+
+              // Listen for messages from the callback page
+              window.addEventListener("message", (event) => {
+                if (event.origin === window.location.origin) {
+                  if (event.data === "auth_success") {
+                    console.log("Authentication successful, redirecting...");
+                    router.push(callbackUrl);
+                  }
+                }
+              });
             } else {
-              router.push(callbackUrl);
+              // For PC browsers, use regular navigation
+              console.log("Using regular browser navigation...");
+              window.location.href = result.url;
             }
           }
         } catch (error) {
@@ -45,7 +62,6 @@ function SignInContent() {
         console.log(
           `Retrying sign in (attempt ${retryCount + 1}/${maxRetries})...`
         );
-        // Wait for 5 seconds before retrying
         await new Promise((resolve) => setTimeout(resolve, 5000));
         setRetryCount((prev) => prev + 1);
         const result = await signIn("twitter", {
@@ -53,11 +69,18 @@ function SignInContent() {
           redirect: false,
         });
 
-        if (result?.ok) {
-          if (isTelegramBrowser) {
-            window.location.href = result.url || callbackUrl;
+        if (result?.ok && result?.url) {
+          if (isTelegram) {
+            window.open(result.url, "_blank");
+            window.addEventListener("message", (event) => {
+              if (event.origin === window.location.origin) {
+                if (event.data === "auth_success") {
+                  router.push(callbackUrl);
+                }
+              }
+            });
           } else {
-            router.push(callbackUrl);
+            window.location.href = result.url;
           }
         }
       }
@@ -65,7 +88,7 @@ function SignInContent() {
     };
 
     handleSignIn();
-  }, [callbackUrl, error, retryCount, router]);
+  }, [callbackUrl, error, retryCount, router, isTelegram]);
 
   if (error) {
     return (
@@ -114,7 +137,9 @@ function SignInContent() {
       <div className="text-center max-w-md">
         <h1 className="text-2xl font-bold mb-4">Signing in...</h1>
         <p className="text-gray-600 mb-4">
-          Please wait while we redirect you to Twitter.
+          {isTelegram
+            ? "Please complete authentication in your browser"
+            : "Please wait while we redirect you to Twitter."}
         </p>
         {isLoading && (
           <div className="mt-4">

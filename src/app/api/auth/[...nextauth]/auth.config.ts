@@ -60,6 +60,7 @@ export const authOptions: NextAuthOptions = {
           scope: "tweet.read users.read offline.access",
           response_type: "code",
           prompt: "consent",
+          state: "telegram_auth",
         },
       },
       profile(profile) {
