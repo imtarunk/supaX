@@ -91,3 +91,98 @@ export const hardcodedMentions = [
     id: "1910135313227297030",
   },
 ];
+
+export const hardcodedLikes = [
+  {
+    id: "1906807533903204414",
+    edit_history_tweet_ids: ["1906807533903204414"],
+    text: "📢 let us know what feature your want, we will train the model and ship the weights. https://t.co/HnH1yUKigC",
+  },
+  {
+    id: "1906212567611330978",
+    edit_history_tweet_ids: ["1906212567611330978"],
+    text: "@SokolGeoff as a business we are doing really great but thanks for your concern",
+  },
+  {
+    id: "1891266960903622997",
+    edit_history_tweet_ids: ["1891266960903622997"],
+    text: "Touchdown @iitroorkee\n1. Giving a talk at alma matter\n2. Brought everyone from Super 30 on campus for convocation \n3. Got recognised by the guy checking me into my hotel (student at COER) https://t.co/jAldOmsCW8",
+  },
+  {
+    id: "1890404640161775623",
+    edit_history_tweet_ids: ["1890404640161775623"],
+    text: "Thirty-two years together and you still take my breath away. Happy Valentine’s Day, @MichelleObama! https://t.co/wiIJ0kstRm",
+  },
+  {
+    id: "1839006538536526165",
+    edit_history_tweet_ids: ["1839006538536526165"],
+    text: "MINT DETAILS \n\nTIME : 26/9 17:30 UTC\nSUPPLY : 1212 #NFT \nPRICE : FREE MINT $SOL\nLUNCHPAD : @LaunchMyNFT \n\n@dead_y00ts @webkidz @lookupcatnip @MutantsOnSol @goofriendsnft  HOLDERS WILL GET WL \n\nDROP YOUR SOLANA WALLET (TURN ON NOTIS🔔) https://t.co/mi1uQZjV7l",
+  },
+  {
+    id: "1771211997083783637",
+    edit_history_tweet_ids: ["1771211997083783637"],
+    text: "Heartbreaking image of #ArvindKejriwal from the court 💔\n\nHe is still smiling 🔥 https://t.co/aWZ1k7oqK9",
+  },
+  {
+    id: "1771432466366222602",
+    edit_history_tweet_ids: ["1771432466366222602"],
+    text: "Each and Everyone Of you. And Everyoneeee 🙏🏼🌍",
+  },
+  {
+    id: "1771426033608343990",
+    edit_history_tweet_ids: ["1771426033608343990"],
+    text: "Thank You ♥️🙏🏼",
+  },
+  {
+    id: "1769671161699516485",
+    edit_history_tweet_ids: ["1769671161699516485"],
+    text: '"हमे पता है ये बहुत मुश्किल समय है, आप और आपके परिवार के लिए। हम कल भी आपके साथ थे, हम आज भी आपके साथ हैं, मेरे भाई"🙏 @ElvishYadav',
+  },
+  {
+    id: "1769705459647463558",
+    edit_history_tweet_ids: ["1769705459647463558"],
+    text: "I have met Elvish in UAE 2022 and I remember how he avoided alcohol in our Dubai Party. \n\nI don’t think he even consumes alcohol,\nLet’s hope for the best!",
+  },
+  {
+    id: "1769692032778285438",
+    edit_history_tweet_ids: ["1769692032778285438"],
+    text: "@loveutuber The Madarsa Chhapp🚫🤣 https://t.co/iN5O5y7sYK",
+  },
+  {
+    id: "1769692073765253406",
+    edit_history_tweet_ids: ["1769692073765253406"],
+    text: "@loveutuber Dalal ने भी माफी मांगी https://t.co/BCzQML6L1e",
+  },
+  {
+    id: "1769693471969890667",
+    edit_history_tweet_ids: ["1769693471969890667"],
+    text: "@loveutuber Har Har Mahadev",
+  },
+  {
+    id: "1769694085273522331",
+    edit_history_tweet_ids: ["1769694085273522331"],
+    text: "@loveutuber Bhai elvish ke liye professional team rkho jo usko guide or manage kr ske uske pass ab jo fame hai isko handle thik se nhi kr rhe ho, ab wo pehle wali baat nhi hai jo normal trike se chlta rhe usko tum thoda acha ache se management rkhne ke liye bolo. #LoveYouElvishYadav",
+  },
+  {
+    id: "1769695179022246154",
+    edit_history_tweet_ids: ["1769695179022246154"],
+    text: "@loveutuber ☺️ https://t.co/csSFKYqFZ4",
+  },
+  {
+    id: "1769691833360150588",
+    edit_history_tweet_ids: ["1769691833360150588"],
+    text: "@loveutuber #LoveYouElvishYadav\n\nHar Har Mahadev waiting for it",
+  },
+  {
+    id: "1769694635192905866",
+    edit_history_tweet_ids: ["1769694635192905866"],
+    text: "@loveutuber We are waiting for our one liner king ❤️💪\n#LoveYouElvishYadav https://t.co/wmorn77AIJ",
+  },
+  {
+    id: "1752516361799258318",
+    edit_history_tweet_ids: ["1752516361799258318"],
+    text: "Going for a walk with Optimus https://t.co/6mLJCUp30F",
+  },
+];
+
+export const userIdToMention = "@imtarun_saini";

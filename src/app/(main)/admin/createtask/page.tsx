@@ -32,7 +32,7 @@ export default function AdminPage() {
       icon: "",
       task: [
         {
-          type: "tweet",
+          type: "tweet || follow || like",
           content: [
             {
               text: "",
@@ -49,6 +49,7 @@ export default function AdminPage() {
 
   const onSubmit = async (values: z.infer<typeof taskSchema>) => {
     try {
+      console.log("Submitting values:", values);
       const res = await axios.post("/api/admin/createtask", values);
       if (res.status === 200) {
         toast("Task created successfully");

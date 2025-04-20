@@ -9,7 +9,8 @@ import {
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "sonner";
-import { hardcodedMentions } from "@/lib/data";
+import { hardcodedMentions, userIdToMention } from "@/lib/data";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 // import { mentionData } from "@/lib/data";
 type TaskType = "tweet" | "follow" | "like";
@@ -48,7 +49,16 @@ export default function TaskCard({
   const [loading, setLoading] = useState(false);
   const [countdown, setCountdown] = useState(30);
   const taskType = task[0]?.type;
+  const userId = useCurrentUser();
+  const loadedUserId = userId?.user?.twitterId;
 
+  const rewaredPoints = async () => {
+    await axios.post("/api/user/updatepoints", {
+      taskId: taskId,
+      points: points,
+    });
+    toast(`Task completed! ${points} Points added to your account! `);
+  };
   useEffect(() => {
     if (onLoadingChange) {
       onLoadingChange(loading);
@@ -159,16 +169,12 @@ export default function TaskCard({
             );
             // Check if any mention contains @imtarun_saini
             const hasMention = mentionsData.some((mention: TwitterMention) =>
-              mention.text.toLowerCase().includes("@imtarun_saini")
+              mention.text.toLowerCase().includes(userIdToMention)
             );
 
             if (hasMention) {
               // Update points in database
-              await axios.post("/api/user/updatepoints", {
-                taskId: taskId,
-                points: points,
-              });
-              toast(`Task completed! ${points} Points added to your account! `);
+              await rewaredPoints();
               setLoading(false);
               setCountdown(0);
               if (onLoadingChange) onLoadingChange(false);
@@ -193,6 +199,56 @@ export default function TaskCard({
         setLoading(false);
         setCountdown(0);
         if (onLoadingChange) onLoadingChange(false);
+      }
+
+      if (taskType === "like") {
+        const tweetId =
+          typeof task[0].content === "string"
+            ? JSON.parse(task[0].content).text
+            : task[0].content[0]?.text;
+
+        if (!tweetId) {
+          toast.error("Tweet ID not found");
+          setLoading(false);
+          setCountdown(0);
+          if (onLoadingChange) onLoadingChange(false);
+          return;
+        }
+
+        const response = await axios.post("/api/task/like", {
+          tweetId: tweetId,
+        });
+        console.log("Like Response:", response.data);
+
+        if (response.data.RedirectLink) {
+          window.open(response.data.RedirectLink, "_blank");
+        } else {
+          toast.error("Failed to like tweet. Please try again.");
+        }
+
+        const verifyLike = await axios.post("/api/twitter/likes", {
+          tweetId: tweetId,
+        });
+        console.log("Verify Like Response:", verifyLike.data);
+        let likedata = [];
+        if (verifyLike.data.status === 200) {
+          likedata = verifyLike.data.data;
+        } else {
+          likedata = verifyLike.data.hardcodedLikes;
+        }
+
+        const hasLiked = likedata.some((id: string) =>
+          id.includes(loadedUserId as string)
+        );
+
+        if (hasLiked) {
+          await rewaredPoints();
+          setLoading(false);
+          setCountdown(0);
+          if (onLoadingChange) onLoadingChange(false);
+        } else {
+          toast.error("Failed to like tweet. Please try again.");
+        }
       }
     } catch (error) {
       console.error("Error handling task click:", error);

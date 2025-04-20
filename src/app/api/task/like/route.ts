@@ -18,6 +18,7 @@ export async function POST(request: Request) {
       { status: 400 }
     );
   }
+  console.log("This is from server =====", tweetId);
 
   const link = `https://twitter.com/i/web/status/${tweetId}`;
 
@@ -29,7 +30,7 @@ export async function POST(request: Request) {
   }
 
   return NextResponse.json(
-    { message: "Tweet liked successfully", DedirectLink: link },
+    { message: "Tweet liked successfully", RedirectLink: link },
     { status: 200 }
   );
 }
