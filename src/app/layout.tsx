@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { Space_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "../components/providers";
+import Script from "next/script";
 
 const spaceMono = Space_Mono({
   subsets: ["latin"],
@@ -24,12 +25,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        <script src="https://telegram.org/js/telegram-web-app.js" async />
-      </head>
+      <head />
       <body
         className={`${spaceMono.variable} font-mono bg-black text-white antialiased`}
       >
+        <Script
+          src="https://telegram.org/js/telegram-web-app.js?56"
+          strategy="beforeInteractive"
+        />
         <Providers>{children}</Providers>
       </body>
     </html>
