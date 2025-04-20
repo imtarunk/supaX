@@ -13,6 +13,37 @@ export async function POST(request: Request) {
     console.log("Received taskId:", taskId);
     console.log("Received points:", points);
     console.log("User ID:", user.id);
+    console.log("Current user points:", user.points);
+
+    // Special case for claim reward
+    // if (taskId === "claim-reward") {
+    //   // For claim reward, points is negative, so we add it to subtract
+    //   const newPoints = user.points + points;
+    //   console.log("New points after claim:", newPoints);
+
+    //   if (newPoints < 0) {
+    //     return NextResponse.json(
+    //       { error: "Insufficient points" },
+    //       { status: 400 }
+    //     );
+    //   }
+
+    //   // Directly update user points without creating/updating UserTask
+    //   const updatedUser = await prisma.user.update({
+    //     where: {
+    //       id: user.id,
+    //     },
+    //     data: {
+    //       points: newPoints,
+    //     },
+    //   });
+
+    //   console.log("Updated user points:", updatedUser.points);
+    //   return NextResponse.json(
+    //     { message: "Points updated successfully", points: updatedUser.points },
+    //     { status: 200 }
+    //   );
+    // }
 
     if (!taskId) {
       return NextResponse.json(
@@ -57,7 +88,7 @@ export async function POST(request: Request) {
       console.log("Created new UserTask:", newUserTask);
 
       // Update user points
-      await prisma.user.update({
+      const updatedUser = await prisma.user.update({
         where: {
           id: user.id,
         },
@@ -67,7 +98,7 @@ export async function POST(request: Request) {
       });
 
       return NextResponse.json(
-        { message: "Points updated successfully", points: user.points },
+        { message: "Points updated successfully", points: updatedUser.points },
         { status: 200 }
       );
     }
@@ -83,7 +114,7 @@ export async function POST(request: Request) {
     });
 
     // Update user points
-    await prisma.user.update({
+    const updatedUser = await prisma.user.update({
       where: {
         id: user.id,
       },
@@ -93,7 +124,7 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json(
-      { message: "Points updated successfully", points: user.points },
+      { message: "Points updated successfully", points: updatedUser.points },
       { status: 200 }
     );
   } catch (error) {

@@ -9,11 +9,5 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <html lang="en">
-      <body>
-        <WalletProviderWrapper>{children}</WalletProviderWrapper>
-      </body>
-    </html>
-  );
+  return <WalletProviderWrapper>{children}</WalletProviderWrapper>;
 }

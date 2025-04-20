@@ -4,8 +4,10 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/auth.config";
 
 export async function getCurrentUser() {
   const session = await getServerSession(authOptions);
+  console.log("Session:", session);
 
   if (!session?.user?.id) {
+    console.log("No session or user ID found");
     return null;
   }
 
@@ -18,8 +20,10 @@ export async function getCurrentUser() {
         twitterAccount: true,
       },
     });
+    console.log("User from database:", user);
 
     if (!user) {
+      console.log("No user found in database");
       return null;
     }
 

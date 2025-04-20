@@ -7,9 +7,24 @@ import { prisma } from "@/lib/prisma";
 // Extend the Session type to include our custom properties
 declare module "next-auth" {
   interface Session {
+    user: {
+      id: string;
+      name?: string | null;
+      email?: string | null;
+      image?: string | null;
+      twitterId?: string;
+    };
     accessToken?: string;
     refreshToken?: string;
     expiresAt?: number;
+  }
+
+  interface User {
+    id: string;
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+    twitterId?: string;
   }
 }
 
@@ -28,35 +43,6 @@ interface CustomAdapterUser extends Omit<AdapterUser, "id"> {
   id?: string;
 }
 
-// Rate limiting configuration
-const RATE_LIMIT = {
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  maxRequests: 15, // Twitter's rate limit for OAuth
-  currentRequests: 0,
-  resetTime: Date.now(),
-};
-
-// Function to check and handle rate limits
-const checkRateLimit = async () => {
-  const now = Date.now();
-
-  // Reset counter if window has passed
-  if (now > RATE_LIMIT.resetTime) {
-    RATE_LIMIT.currentRequests = 0;
-    RATE_LIMIT.resetTime = now + RATE_LIMIT.windowMs;
-  }
-
-  // If we've hit the rate limit, wait until the window resets
-  if (RATE_LIMIT.currentRequests >= RATE_LIMIT.maxRequests) {
-    const waitTime = RATE_LIMIT.resetTime - now;
-    await new Promise((resolve) => setTimeout(resolve, waitTime));
-    RATE_LIMIT.currentRequests = 0;
-    RATE_LIMIT.resetTime = Date.now() + RATE_LIMIT.windowMs;
-  }
-
-  RATE_LIMIT.currentRequests++;
-};
-
 // Custom adapter to handle user creation
 const customAdapter = {
   ...PrismaAdapter(prisma),
@@ -74,20 +60,34 @@ const customAdapter = {
           data: {
             name: data.name,
             image: data.image,
-            email: data.email || "",
+            email: data.email || null,
           },
         }) as Promise<AdapterUser>;
       }
 
       // If user doesn't exist, create a new one
-      return prisma.user.create({
+      const newUser = await prisma.user.create({
         data: {
           name: data.name,
           image: data.image,
           twitterId: data.twitterId || "",
-          email: data.email || "",
+          email: data.email || null,
+          points: 0,
         },
-      }) as Promise<AdapterUser>;
+      });
+
+      // Create TwitterAccount for the new user
+      await prisma.twitterAccount.create({
+        data: {
+          userId: newUser.id,
+          twitterId: data.twitterId || "",
+          accessToken: "",
+          refreshToken: "",
+          expiresAt: new Date(),
+        },
+      });
+
+      return newUser as AdapterUser;
     } catch (error) {
       console.error("Error in createUser:", error);
       throw error;
@@ -108,7 +108,6 @@ export const authOptions: NextAuthOptions = {
         },
       },
       profile: async (profile: TwitterProfile) => {
-        await checkRateLimit();
         return {
           id: profile.data.id,
           name: profile.data.name,
@@ -120,45 +119,34 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, account }) {
-      if (account?.access_token) {
-        try {
-          await checkRateLimit();
-          token.accessToken = account.access_token;
-          token.refreshToken = account.refresh_token;
-          token.expiresAt = account.expires_at;
-        } catch (error) {
-          console.error("Error in jwt callback:", error);
-        }
+    async jwt({ token, account, user }) {
+      if (account) {
+        token.accessToken = account.access_token;
+        token.refreshToken = account.refresh_token;
+        token.expiresAt = account.expires_at;
+      }
+      if (user) {
+        token.id = user.id;
+        token.twitterId = (user as CustomAdapterUser).twitterId;
       }
       return token;
     },
-    async session({ session, token, user }) {
+    async session({ session, token }) {
       if (session.user) {
-        try {
-          await checkRateLimit();
-          const customUser = user as CustomAdapterUser;
-          session.user.id = customUser?.id || token.sub || "";
-          session.user.twitterId = customUser?.twitterId || token.sub || "";
-          session.accessToken = token.accessToken as string;
-          session.refreshToken = token.refreshToken as string;
-          session.expiresAt = token.expiresAt as number;
-        } catch (error) {
-          console.error("Error in session callback:", error);
-        }
+        session.user.id = token.id as string;
+        session.user.twitterId = token.twitterId as string;
+        session.accessToken = token.accessToken as string;
+        session.refreshToken = token.refreshToken as string;
+        session.expiresAt = token.expiresAt as number;
       }
       return session;
     },
     async redirect({ url, baseUrl }) {
-      // If the URL is relative, prepend the base URL
       if (url.startsWith("/")) {
         return `${baseUrl}${url}`;
-      }
-      // If the URL is from the same origin, allow it
-      else if (new URL(url).origin === baseUrl) {
+      } else if (new URL(url).origin === baseUrl) {
         return url;
       }
-      // Default to dashboard
       return `${baseUrl}/dashboard`;
     },
   },

@@ -7,12 +7,14 @@ import { WobbleCard } from "./ui/wobble-card";
 import { cn } from "@/lib/utils";
 import { LoginIcon } from "./icons/icons";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { useEffect } from "react";
 
 const recipientId = "1396073250019500032";
 const message = `Hey fren! 👋
 Welcome to Supax v1 devlopment version — your new web3 social playground 🌐💬
 Complete simple tasks, engage with the community, and earn SOL along the way! 🚀
-We’re just getting started, and you’re early. Let’s build together. 🛠️
+We're just getting started, and you're early. Let's build together. 🛠️
 
 `;
 const encodedMessage = encodeURIComponent(message);
@@ -49,8 +51,20 @@ const ContactButton = ({
   );
 };
 
-const LandingPage = () => {
+const LandingPage: React.FC = (): JSX.Element => {
   const router = useRouter();
+  const session = useSession();
+
+  useEffect(() => {
+    if (!session) {
+      router.push("/api/auth/signin");
+    }
+  }, [session, router]);
+
+  if (!session) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="relative bg-black min-h-screen text-white font-mono overflow-hidden">
       {/* Sparkling background layer - you can add this back if you had one */}
@@ -60,7 +74,7 @@ const LandingPage = () => {
         {/* Floating Contact Button */}
         <div
           className="fixed top-4 left-4 z-50 md:absolute"
-          onClick={() => router.push("/dashboard")}
+          onClick={() => router.push("/api/auth/signin")}
         >
           <LoginIcon />
         </div>

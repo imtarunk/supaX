@@ -4,14 +4,36 @@ import { signOut } from "next-auth/react";
 import { toast } from "sonner";
 
 type User = {
-  twitterId: string | null;
+  id: string;
   name: string | null;
+  email: string | null;
+  image: string | null;
+  points: number;
+  twitterId?: string | null;
 };
 
 const SettingsCard = ({ user }: { user: User }) => {
   const handlelogout = async () => {
     try {
-      await signOut({ callbackUrl: "/" });
+      // Clear all cookies
+      document.cookie.split(";").forEach((c) => {
+        document.cookie = c
+          .replace(/^ +/, "")
+          .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+      });
+
+      // Clear localStorage
+      localStorage.clear();
+
+      // Clear sessionStorage
+      sessionStorage.clear();
+
+      // Sign out from NextAuth
+      await signOut({
+        callbackUrl: "/",
+        redirect: true,
+      });
+
       toast.success("Logged out successfully");
     } catch (error: unknown) {
       console.error("Logout error:", error);
