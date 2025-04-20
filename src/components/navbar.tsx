@@ -84,16 +84,16 @@ const Navbar = ({ initialUser }: { initialUser: User | null }) => {
             {/* Streak Button - Simplified on mobile */}
             <button className="relative inline-flex h-8 md:h-12 overflow-hidden rounded-full p-[1px] focus:outline-none">
               <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]" />
-              <span className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-slate-950 px-2 md:px-3 py-1 text-xs md:text-sm font-medium text-white backdrop-blur-3xl">
-                <IoFlame className="text-orange-500" />
+              <span className="inline-flex h-full w-full cursor-pointer items-center justify-center  bg-slate-950 px-2 md:px-3 py-1 md:py-3 rounded-full tracking-wide md:tracking-widest uppercase font-bold  text-white backdrop-blur-3xl">
+                <IoFlame className="text-orange-500 text-2xl" />
                 <span className="ml-1 md:ml-2">2</span>
               </span>
             </button>
 
             {/* Points Button - Simplified on mobile */}
-            <button className="border border-gray-800 text-black px-2 md:px-3 py-1 md:py-3 rounded-full tracking-wide md:tracking-widest uppercase font-bold bg-transparent dark:text-neutral-200 transition duration-200 flex items-center text-xs md:text-sm">
-              <RiFlashlightFill className="text-yellow-500" />
-              <span className="ml-1">{points || 0}</span>
+            <button className="border border-gray-800 text-black px-2 md:px-3 py-1 md:py-3 rounded-full tracking-wide md:tracking-widest uppercase font-bold bg-transparent dark:text-neutral-200 transition duration-200 flex items-center text-sm md:text-sm">
+              <RiFlashlightFill className="text-yellow-500 text-2xl" />
+              <span className="ml-1">{points || 0} | XP </span>
             </button>
           </div>
 
