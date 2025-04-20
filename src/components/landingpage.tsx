@@ -74,7 +74,7 @@ const LandingPage: React.FC = (): JSX.Element => {
         {/* Floating Contact Button */}
         <div
           className="fixed top-4 left-4 z-50 md:absolute"
-          onClick={() => router.push("/api/auth/signin")}
+          onClick={() => router.push("/login")}
         >
           <LoginIcon />
         </div>

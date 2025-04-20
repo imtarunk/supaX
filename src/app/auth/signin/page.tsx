@@ -1,112 +1,80 @@
 "use client";
 
 import { signIn } from "next-auth/react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 
 function SignInContent() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
   const error = searchParams.get("error");
   const [isLoading, setIsLoading] = useState(true);
   const [retryCount, setRetryCount] = useState(0);
   const maxRetries = 3;
   const [isTelegram, setIsTelegram] = useState(false);
+  const [inTelegram, setInTelegram] = useState(false);
 
   useEffect(() => {
-    // Check if we're in Telegram Mini App
-    const isInTelegram = !!window.Telegram?.WebApp?.initData;
-    console.log("Telegram WebApp detection:", {
-      isInTelegram,
-      initData: window.Telegram?.WebApp?.initData,
-    });
-    setIsTelegram(isInTelegram);
+    if (typeof window !== "undefined" && window.Telegram?.WebApp?.initData) {
+      setInTelegram(true);
+      setIsTelegram(true);
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get("token");
+    if (token) {
+      localStorage.setItem("auth_token", token);
+    }
   }, []);
+
+  const handleLogin = () => {
+    const url =
+      "https://supax.codextarun.xyz/api/auth/signin?callbackUrl=" +
+      encodeURIComponent(callbackUrl);
+    window.open(url, "_blank"); // open login in external browser
+  };
 
   useEffect(() => {
     const handleSignIn = async () => {
-      console.log("Starting sign in process...", {
+      console.log("Sign-in flow starting...", {
         isTelegram,
         callbackUrl,
         error,
       });
 
-      if (!error) {
+      if (!error && !isTelegram) {
         try {
-          // Construct the return URL for Telegram Mini App
-          const telegramReturnUrl = isTelegram
-            ? `${
-                window.location.origin
-              }/auth/callback?telegram=true&returnTo=${encodeURIComponent(
-                callbackUrl
-              )}`
-            : callbackUrl;
-
-          console.log("Using callback URL:", telegramReturnUrl);
-
           const result = await signIn("twitter", {
-            callbackUrl: telegramReturnUrl,
+            callbackUrl,
             redirect: false,
           });
 
-          console.log("Sign in result:", result);
+          console.log("Sign-in result:", result);
 
           if (result?.ok && result?.url) {
-            if (isTelegram && window.Telegram?.WebApp) {
-              console.log(
-                "Opening auth in Telegram external browser:",
-                result.url
-              );
-              window.Telegram.WebApp.openLink(result.url, {
-                try_instant_view: false,
-              });
-            } else {
-              console.log("Regular browser navigation to:", result.url);
-              window.location.href = result.url;
-            }
-          } else {
-            console.error("Sign in failed:", result);
-          }
-        } catch (error) {
-          console.error("Error during sign in:", error);
-        }
-      } else if (error === "OAuthCallback" && retryCount < maxRetries) {
-        console.log(
-          `Retrying sign in (attempt ${retryCount + 1}/${maxRetries})...`
-        );
-        await new Promise((resolve) => setTimeout(resolve, 5000));
-        setRetryCount((prev) => prev + 1);
-
-        const telegramReturnUrl = isTelegram
-          ? `${
-              window.location.origin
-            }/auth/callback?telegram=true&returnTo=${encodeURIComponent(
-              callbackUrl
-            )}`
-          : callbackUrl;
-
-        const result = await signIn("twitter", {
-          callbackUrl: telegramReturnUrl,
-          redirect: false,
-        });
-
-        if (result?.ok && result?.url) {
-          if (isTelegram && window.Telegram?.WebApp) {
-            window.Telegram.WebApp.openLink(result.url, {
-              try_instant_view: false,
-            });
-          } else {
             window.location.href = result.url;
+          } else {
+            console.error("Failed sign in:", result);
           }
+        } catch (err) {
+          console.error("Error during sign in:", err);
         }
+      } else if (
+        error === "OAuthCallback" &&
+        retryCount < maxRetries &&
+        !isTelegram
+      ) {
+        console.log(`Retrying sign-in (${retryCount + 1}/${maxRetries})...`);
+        await new Promise((res) => setTimeout(res, 5000));
+        setRetryCount((prev) => prev + 1);
       }
+
       setIsLoading(false);
     };
 
     handleSignIn();
-  }, [callbackUrl, error, retryCount, router, isTelegram]);
+  }, [callbackUrl, error, retryCount, isTelegram]);
 
   if (error) {
     return (
@@ -118,13 +86,13 @@ function SignInContent() {
               ? "Error signing in with Twitter. Please try again."
               : error === "OAuthCallback"
               ? retryCount < maxRetries
-                ? `Rate limit reached. Retrying in 5 seconds... (${
+                ? `Rate limit hit. Retrying... (${
                     retryCount + 1
                   }/${maxRetries})`
-                : "Too many requests. Please try again later."
+                : "Too many retries. Try again later."
               : error === "OAuthAccountNotLinked"
-              ? "This Twitter account is not linked to any user. Please try signing in with a different account."
-              : "An error occurred during authentication."}
+              ? "This Twitter account is not linked to a user. Try a different login method."
+              : "Unknown error occurred."}
           </p>
           <div className="space-y-4">
             {retryCount >= maxRetries && (
@@ -133,15 +101,12 @@ function SignInContent() {
                   setRetryCount(0);
                   signIn("twitter", { callbackUrl });
                 }}
-                className="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
+                className="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
               >
                 Try Again
               </button>
             )}
-            <Link
-              href="/"
-              className="block text-blue-500 hover:text-blue-700 underline"
-            >
+            <Link href="/" className="block text-blue-500 hover:underline">
               Return to Home
             </Link>
           </div>
@@ -154,15 +119,32 @@ function SignInContent() {
     <div className="flex min-h-screen items-center justify-center px-4">
       <div className="text-center max-w-md">
         <h1 className="text-2xl font-bold mb-4">Signing in...</h1>
-        <p className="text-gray-600 mb-4">
-          {isTelegram
-            ? "Please complete authentication in your browser when it opens"
-            : "Please wait while we redirect you to Twitter."}
-        </p>
+
+        {inTelegram && (
+          <>
+            <p className="mt-4 text-red-600 font-semibold">
+              Twitter login is not supported inside Telegram.
+            </p>
+            <p className="mt-2">Tap below to open in your browser 👇</p>
+            <button
+              onClick={handleLogin}
+              className="mt-4 px-6 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600"
+            >
+              Login via Twitter
+            </button>
+          </>
+        )}
+
         {isLoading && (
-          <div className="mt-4">
+          <div className="mt-6">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
           </div>
+        )}
+
+        {!inTelegram && !error && (
+          <p className="mt-6 text-green-600">
+            You&apos;re in a supported browser 🚀
+          </p>
         )}
       </div>
     </div>
