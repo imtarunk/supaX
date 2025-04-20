@@ -17,53 +17,57 @@ function SignInContent() {
 
   useEffect(() => {
     // Check if we're in Telegram Mini App
-    setIsTelegram(!!window.Telegram?.WebApp?.initData);
+    const isInTelegram = !!window.Telegram?.WebApp?.initData;
+    console.log("Telegram WebApp detection:", {
+      isInTelegram,
+      initData: window.Telegram?.WebApp?.initData,
+    });
+    setIsTelegram(isInTelegram);
   }, []);
 
   useEffect(() => {
     const handleSignIn = async () => {
-      console.log("Starting sign in process...");
-      console.log("Callback URL:", callbackUrl);
-      console.log("Is Telegram Mini App:", isTelegram);
+      console.log("Starting sign in process...", {
+        isTelegram,
+        callbackUrl,
+        error,
+      });
 
       if (!error) {
         try {
-          console.log("Initiating Twitter sign in...");
+          // Construct the return URL for Telegram Mini App
+          const telegramReturnUrl = isTelegram
+            ? `${
+                window.location.origin
+              }/auth/callback?telegram=true&returnTo=${encodeURIComponent(
+                callbackUrl
+              )}`
+            : callbackUrl;
+
+          console.log("Using callback URL:", telegramReturnUrl);
+
           const result = await signIn("twitter", {
-            callbackUrl,
+            callbackUrl: telegramReturnUrl,
             redirect: false,
           });
 
+          console.log("Sign in result:", result);
+
           if (result?.ok && result?.url) {
-            if (isTelegram) {
-              // For Telegram Mini App, use a different approach
-              console.log("Using Telegram-compatible auth flow...");
-
-              // Create a hidden iframe for authentication
-              const iframe = document.createElement("iframe");
-              iframe.style.display = "none";
-              iframe.src = result.url;
-              document.body.appendChild(iframe);
-
-              // Listen for messages from the iframe
-              window.addEventListener("message", (event) => {
-                if (event.origin === window.location.origin) {
-                  if (event.data === "auth_success") {
-                    console.log("Authentication successful, redirecting...");
-                    router.push(callbackUrl);
-                  }
-                }
+            if (isTelegram && window.Telegram?.WebApp) {
+              console.log(
+                "Opening auth in Telegram external browser:",
+                result.url
+              );
+              window.Telegram.WebApp.openLink(result.url, {
+                try_instant_view: false,
               });
-
-              // Remove iframe after a timeout
-              setTimeout(() => {
-                document.body.removeChild(iframe);
-              }, 5000);
             } else {
-              // For PC browsers, use regular navigation
-              console.log("Using regular browser navigation...");
+              console.log("Regular browser navigation to:", result.url);
               window.location.href = result.url;
             }
+          } else {
+            console.error("Sign in failed:", result);
           }
         } catch (error) {
           console.error("Error during sign in:", error);
@@ -74,29 +78,25 @@ function SignInContent() {
         );
         await new Promise((resolve) => setTimeout(resolve, 5000));
         setRetryCount((prev) => prev + 1);
+
+        const telegramReturnUrl = isTelegram
+          ? `${
+              window.location.origin
+            }/auth/callback?telegram=true&returnTo=${encodeURIComponent(
+              callbackUrl
+            )}`
+          : callbackUrl;
+
         const result = await signIn("twitter", {
-          callbackUrl,
+          callbackUrl: telegramReturnUrl,
           redirect: false,
         });
 
         if (result?.ok && result?.url) {
-          if (isTelegram) {
-            const iframe = document.createElement("iframe");
-            iframe.style.display = "none";
-            iframe.src = result.url;
-            document.body.appendChild(iframe);
-
-            window.addEventListener("message", (event) => {
-              if (event.origin === window.location.origin) {
-                if (event.data === "auth_success") {
-                  router.push(callbackUrl);
-                }
-              }
+          if (isTelegram && window.Telegram?.WebApp) {
+            window.Telegram.WebApp.openLink(result.url, {
+              try_instant_view: false,
             });
-
-            setTimeout(() => {
-              document.body.removeChild(iframe);
-            }, 5000);
           } else {
             window.location.href = result.url;
           }
@@ -156,7 +156,7 @@ function SignInContent() {
         <h1 className="text-2xl font-bold mb-4">Signing in...</h1>
         <p className="text-gray-600 mb-4">
           {isTelegram
-            ? "Please wait while we authenticate..."
+            ? "Please complete authentication in your browser when it opens"
             : "Please wait while we redirect you to Twitter."}
         </p>
         {isLoading && (
