@@ -8,13 +8,11 @@ function CallbackContent() {
   const error = searchParams.get("error");
 
   useEffect(() => {
-    // Send success message to opener window
-    if (window.opener && !error) {
-      window.opener.postMessage("auth_success", window.location.origin);
-      window.close();
+    // Send message to parent window
+    if (window.parent && !error) {
+      window.parent.postMessage("auth_success", window.location.origin);
     } else if (error) {
-      window.opener?.postMessage("auth_error", window.location.origin);
-      window.close();
+      window.parent?.postMessage("auth_error", window.location.origin);
     }
   }, [error]);
 
@@ -27,7 +25,7 @@ function CallbackContent() {
         <p className="text-gray-600">
           {error
             ? "An error occurred during authentication. Please try again."
-            : "You can close this window and return to the app."}
+            : "Authentication complete. You can close this window."}
         </p>
       </div>
     </div>

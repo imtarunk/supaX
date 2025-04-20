@@ -36,11 +36,16 @@ function SignInContent() {
 
           if (result?.ok && result?.url) {
             if (isTelegram) {
-              // For Telegram Mini App, open in external browser
-              console.log("Opening Twitter auth in external browser...");
-              window.open(result.url, "_blank");
+              // For Telegram Mini App, use a different approach
+              console.log("Using Telegram-compatible auth flow...");
 
-              // Listen for messages from the callback page
+              // Create a hidden iframe for authentication
+              const iframe = document.createElement("iframe");
+              iframe.style.display = "none";
+              iframe.src = result.url;
+              document.body.appendChild(iframe);
+
+              // Listen for messages from the iframe
               window.addEventListener("message", (event) => {
                 if (event.origin === window.location.origin) {
                   if (event.data === "auth_success") {
@@ -49,6 +54,11 @@ function SignInContent() {
                   }
                 }
               });
+
+              // Remove iframe after a timeout
+              setTimeout(() => {
+                document.body.removeChild(iframe);
+              }, 5000);
             } else {
               // For PC browsers, use regular navigation
               console.log("Using regular browser navigation...");
@@ -71,7 +81,11 @@ function SignInContent() {
 
         if (result?.ok && result?.url) {
           if (isTelegram) {
-            window.open(result.url, "_blank");
+            const iframe = document.createElement("iframe");
+            iframe.style.display = "none";
+            iframe.src = result.url;
+            document.body.appendChild(iframe);
+
             window.addEventListener("message", (event) => {
               if (event.origin === window.location.origin) {
                 if (event.data === "auth_success") {
@@ -79,6 +93,10 @@ function SignInContent() {
                 }
               }
             });
+
+            setTimeout(() => {
+              document.body.removeChild(iframe);
+            }, 5000);
           } else {
             window.location.href = result.url;
           }
@@ -138,7 +156,7 @@ function SignInContent() {
         <h1 className="text-2xl font-bold mb-4">Signing in...</h1>
         <p className="text-gray-600 mb-4">
           {isTelegram
-            ? "Please complete authentication in your browser"
+            ? "Please wait while we authenticate..."
             : "Please wait while we redirect you to Twitter."}
         </p>
         {isLoading && (
