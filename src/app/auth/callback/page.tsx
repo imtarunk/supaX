@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 
 function CallbackContent() {
   const searchParams = useSearchParams();
@@ -11,6 +12,13 @@ function CallbackContent() {
   const router = useRouter();
 
   useEffect(() => {
+    // Check if we're in Twitter's browser
+    const isTwitterBrowser = /Twitter/.test(navigator.userAgent);
+    console.log("Browser detection:", {
+      userAgent: navigator.userAgent,
+      isTwitterBrowser,
+    });
+
     const handleCallback = async () => {
       console.log("Handling callback:", {
         error,
@@ -19,9 +27,30 @@ function CallbackContent() {
         currentUrl: window.location.href,
       });
 
-      if (!error) {
+      if (isTwitterBrowser) {
+        try {
+          console.log("Detected Twitter browser, initiating automatic login");
+          const result = await signIn("twitter", {
+            callbackUrl: returnTo || "/dashboard",
+            redirect: false,
+          });
+          console.log("Auto-login result:", result);
+
+          if (result?.ok) {
+            const telegramReturnUrl = `https://t.me/SupaX_bot/app?startapp=${encodeURIComponent(
+              returnTo || "/dashboard"
+            )}`;
+            console.log(
+              "Login successful, redirecting to Telegram:",
+              telegramReturnUrl
+            );
+            window.location.href = telegramReturnUrl;
+          }
+        } catch (error) {
+          console.error("Error during auto-login:", error);
+        }
+      } else if (!error) {
         if (isTelegram && window.Telegram?.WebApp) {
-          // If we're in the external browser after Telegram auth
           try {
             const telegramReturnUrl = `https://t.me/SupaX_bot/app?startapp=${encodeURIComponent(
               returnTo || "/dashboard"

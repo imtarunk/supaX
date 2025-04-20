@@ -35,6 +35,10 @@ function SignInContent() {
     window.open(url, "_blank"); // open login in external browser
   };
 
+  if (inTelegram) {
+    handleLogin();
+  }
+
   useEffect(() => {
     const handleSignIn = async () => {
       console.log("Sign-in flow starting...", {
@@ -127,7 +131,7 @@ function SignInContent() {
             </p>
             <p className="mt-2">Tap below to open in your browser 👇</p>
             <button
-              onClick={handleLogin}
+              onClick={() => handleLogin()}
               className="mt-4 px-6 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600"
             >
               Login via Twitter
