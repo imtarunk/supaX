@@ -58,7 +58,19 @@ export const authOptions: NextAuthOptions = {
       authorization: {
         params: {
           scope: "tweet.read users.read offline.access",
+          response_type: "code",
+          prompt: "consent",
         },
+      },
+      profile(profile) {
+        return {
+          id: profile.id,
+          name: profile.name,
+          email: profile.email,
+          image: profile.profile_image_url,
+          twitterId: profile.username,
+          points: 0,
+        };
       },
     }),
   ],

@@ -19,6 +19,9 @@ function SignInContent() {
       console.log("Starting sign in process...");
       console.log("Callback URL:", callbackUrl);
 
+      // Check if we're in Telegram's in-app browser
+      const isTelegramBrowser = /Telegram/.test(navigator.userAgent);
+
       if (!error) {
         try {
           console.log("Initiating Twitter sign in...");
@@ -28,7 +31,12 @@ function SignInContent() {
           });
 
           if (result?.ok) {
-            router.push(callbackUrl);
+            if (isTelegramBrowser) {
+              // For Telegram browser, we need to handle the redirect differently
+              window.location.href = result.url || callbackUrl;
+            } else {
+              router.push(callbackUrl);
+            }
           }
         } catch (error) {
           console.error("Error during sign in:", error);
@@ -46,7 +54,11 @@ function SignInContent() {
         });
 
         if (result?.ok) {
-          router.push(callbackUrl);
+          if (isTelegramBrowser) {
+            window.location.href = result.url || callbackUrl;
+          } else {
+            router.push(callbackUrl);
+          }
         }
       }
       setIsLoading(false);
