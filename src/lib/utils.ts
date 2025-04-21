@@ -26,3 +26,8 @@ export function generateCodeChallenge(verifier: string): string {
     .replace(/=/g, "");
   return hash;
 }
+
+// utils/isTelegramWebApp.ts
+export function isTelegramWebApp(): boolean {
+  return typeof window !== "undefined" && !!window.Telegram?.WebApp;
+}

@@ -1,16 +1,9 @@
 "use client";
-import React, { useState } from "react";
+
 import { XIcon } from "./icons/icons";
-import { Loader2 } from "lucide-react";
+import TwitterLoginButton from "./loginButton";
 
 const XConnectPage = () => {
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleConnect = () => {
-    setIsLoading(true);
-    window.location.href = "/api/auth/signin";
-  };
-
   return (
     <div className="min-h-screen flex items-center justify-center  px-4 py-12 sm:px-6 lg:px-8">
       <div className="w-full max-w-md">
@@ -30,20 +23,7 @@ const XConnectPage = () => {
 
           {/* Connect Button */}
           <div className="mt-8">
-            <button
-              onClick={handleConnect}
-              disabled={isLoading}
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-lg font-medium rounded-lg text-white bg-black hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300"
-            >
-              {isLoading ? (
-                <span className="flex items-center">
-                  <Loader2 className="animate-spin mr-2 h-5 w-5" />
-                  Connecting...
-                </span>
-              ) : (
-                "Connect X Account"
-              )}
-            </button>
+            <TwitterLoginButton />
           </div>
 
           {/* Additional Info */}
