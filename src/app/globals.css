@@ -167,3 +167,129 @@ pre {
     }
   }
 }
+
+@layer utilities {
+  .animate-bg-pan {
+    animation: bg-pan 3s linear infinite;
+    background-size: 200% 200%;
+    background-position: 0% 50%;
+  }
+
+  .text-shadow-md {
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);
+  }
+
+  @keyframes bg-pan {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+  @keyframes glitch1 {
+    0% {
+      transform: translate(0);
+      clip-path: inset(0 0 0 0);
+    }
+    10% {
+      transform: translate(-0.2em, 0.1em);
+      clip-path: inset(10% 15% 70% 5%);
+    }
+    20% {
+      transform: translate(0.15em, -0.2em);
+      clip-path: inset(85% 5% 5% 20%);
+    }
+    30% {
+      transform: translate(-0.1em, 0.25em);
+      clip-path: inset(35% 25% 50% 10%);
+    }
+    40% {
+      transform: translate(0.1em, -0.1em);
+      clip-path: inset(92% 10% 2% 15%);
+    }
+    50% {
+      transform: translate(-0.15em, 0.15em);
+      clip-path: inset(15% 30% 65% 8%);
+    }
+    60% {
+      transform: translate(0.05em, -0.05em);
+      clip-path: inset(0 0 0 0);
+    }
+    70% {
+      transform: translate(-0.1em, 0.1em);
+      clip-path: inset(50% 10% 30% 20%);
+    }
+    80% {
+      transform: translate(0.2em, -0.15em);
+      clip-path: inset(5% 25% 80% 5%);
+    }
+    90% {
+      transform: translate(-0.05em, 0.05em);
+      clip-path: inset(70% 5% 15% 30%);
+    }
+    100% {
+      transform: translate(0);
+      clip-path: inset(0 0 0 0);
+    }
+  }
+
+  @keyframes glitch2 {
+    0% {
+      transform: translate(0);
+      clip-path: inset(0 0 0 0);
+    }
+    10% {
+      transform: translate(0.2em, -0.1em);
+      clip-path: inset(5% 10% 80% 15%);
+    }
+    20% {
+      transform: translate(-0.15em, 0.15em);
+      clip-path: inset(75% 20% 10% 5%);
+    }
+    30% {
+      transform: translate(0.1em, -0.25em);
+      clip-path: inset(45% 15% 35% 25%);
+    }
+    40% {
+      transform: translate(-0.05em, 0.1em);
+      clip-path: inset(95% 8% 1% 12%);
+    }
+    50% {
+      transform: translate(0.15em, -0.1em);
+      clip-path: inset(25% 35% 55% 10%);
+    }
+    60% {
+      transform: translate(-0.05em, 0.05em);
+      clip-path: inset(0 0 0 0);
+    }
+    70% {
+      transform: translate(0.1em, -0.1em);
+      clip-path: inset(60% 15% 25% 18%);
+    }
+    80% {
+      transform: translate(-0.2em, 0.15em);
+      clip-path: inset(10% 30% 70% 8%);
+    }
+    90% {
+      transform: translate(0.05em, -0.05em);
+      clip-path: inset(80% 10% 5% 25%);
+    }
+    100% {
+      transform: translate(0);
+      clip-path: inset(0 0 0 0);
+    }
+  }
+
+  .animate-glitch1 {
+    animation: glitch1 0.4s ease-in-out infinite;
+  }
+
+  .animate-glitch2 {
+    animation: glitch2 0.4s ease-in-out infinite reverse;
+  }
+}

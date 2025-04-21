@@ -73,12 +73,13 @@ const LandingPage: React.FC = (): JSX.Element => {
       <div className="relative z-10">
         {/* Floating Contact Button */}
         <div
-          className="fixed top-4 left-4 z-50 md:absolute"
-          onClick={() => router.push("/api/auth/signin")}
+          className="fixed top-4 left-4 z-20 md:absolute md:top-4 md:left-4 cursor-pointer"
+          onClick={() => router.push("/login")}
         >
           <LoginIcon />
         </div>
-        <div className="fixed top-4 right-4 z-50 md:absolute">
+
+        <div className="fixed top-4 right-4 z-20 md:absolute md:top-4 md:right-4">
           <ContactButton size="sm" />
         </div>
 
@@ -86,21 +87,23 @@ const LandingPage: React.FC = (): JSX.Element => {
         <div className="w-full">
           <ContainerScroll
             titleComponent={
-              <div className="flex items-center justify-center flex-col text-center px-6 py-16 md:py-24">
-                <h3 className="text-base md:text-xl font-semibold mb-4 md:mb-6">
+              <div className="flex items-center justify-center flex-col text-center px-4 sm:px-6 py-12 sm:py-16 md:py-24">
+                <h3 className="text-sm sm:text-base md:text-xl font-semibold mb-3 sm:mb-4 md:mb-6">
                   SuperFi by{" "}
-                  <span className="text-yellow-400 font-bold">[LOGO]</span>{" "}
+                  <span className="text-yellow-400 font-bold">
+                    supaX.codextarun.xyz
+                  </span>{" "}
                   Superstellar
                 </h3>
 
-                <h1 className="text-xl md:text-3xl tracking-widest uppercase leading-relaxed md:leading-loose">
+                <h1 className="text-lg sm:text-xl md:text-3xl tracking-wide sm:tracking-wider uppercase leading-snug sm:leading-relaxed md:leading-loose">
                   <span className="font-extrabold">S</span>UPERCHARGE{" "}
                   <span className="font-extrabold">Y</span>OUR{" "}
                   <span className="font-extrabold">C</span>RYPTO{" "}
                   <span className="font-extrabold">C</span>OMMUNITY
                 </h1>
 
-                <h1 className="text-3xl sm:text-5xl md:text-8xl bg-clip-text text-transparent bg-gradient-to-b from-white to-neutral-600 font-bold mt-6 md:mt-8">
+                <h1 className="text-2xl sm:text-4xl md:text-7xl bg-clip-text text-transparent bg-gradient-to-b from-white to-neutral-600 font-bold mt-4 sm:mt-6 md:mt-8">
                   EFFORTLESSLY
                 </h1>
               </div>

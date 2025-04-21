@@ -3,19 +3,24 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-interface Sparkle {
+interface FallingParticle {
   id: number;
-  size: number;
   x: number;
   y: number;
+  length: number;
+  opacity: number;
   delay: number;
   duration: number;
-  moveX: number;
-  moveY: number;
+  color: string;
 }
 
-export default function SparklingBackground() {
-  const [sparkles, setSparkles] = useState<Sparkle[]>([]);
+const getRandomColor = () => {
+  const colors = ["#888", "#aaa", "#ccc", "#eee"]; // Muted, light grayscale colors
+  return colors[Math.floor(Math.random() * colors.length)];
+};
+
+export default function FallingParticlesBackground() {
+  const [particles, setParticles] = useState<FallingParticle[]>([]);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
@@ -33,69 +38,71 @@ export default function SparklingBackground() {
   }, []);
 
   useEffect(() => {
-    const generateSparkles = (count: number) => {
-      const newSparkles: Sparkle[] = [];
+    const generateParticles = (count: number) => {
+      const newParticles: FallingParticle[] = [];
       for (let i = 0; i < count; i++) {
-        newSparkles.push({
+        const startX = Math.random() * dimensions.width;
+        const startY = -Math.random() * 50; // Start slightly above the screen
+        const length = Math.random() * 30 + 10;
+        const opacity = Math.random() * 0.6 + 0.4; // More consistent opacity
+        const duration = Math.random() * 3 + 2;
+
+        newParticles.push({
           id: Math.random(),
-          size: Math.random() * 3 + 1,
-          x: Math.random() * dimensions.width,
-          y: Math.random() * dimensions.height,
+          x: startX,
+          y: startY,
+          length: length,
+          opacity: opacity,
           delay: Math.random() * 2,
-          duration: Math.random() * 3 + 2,
-          moveX: (Math.random() - 0.5) * 2,
-          moveY: (Math.random() - 0.5) * 2,
+          duration: duration,
+          color: getRandomColor(),
         });
       }
-      setSparkles((current) => [...current, ...newSparkles]);
+      setParticles((current) => [...current, ...newParticles]);
     };
 
-    generateSparkles(50);
-    const interval = setInterval(() => generateSparkles(10), 1000);
+    generateParticles(80); // Generate more particles initially
+    const interval = setInterval(() => generateParticles(20), 1000);
 
     return () => clearInterval(interval);
   }, [dimensions]);
 
   useEffect(() => {
-    if (sparkles.length === 0) return;
+    if (particles.length === 0) return;
 
     const timeout = setTimeout(() => {
-      setSparkles((s) => s.slice(Math.max(0, s.length - 100)));
-    }, 5000);
+      setParticles((s) => s.slice(Math.max(0, s.length - 150))); // Keep more particles around longer
+    }, 6000);
 
     return () => clearTimeout(timeout);
-  }, [sparkles]);
+  }, [particles]);
 
   return (
-    <div className="fixed top-0 left-0 w-full h-full ">
+    <div className="fixed top-0 left-0 w-full h-full bg-black overflow-hidden">
       <AnimatePresence>
-        {sparkles.map((sparkle) => (
+        {particles.map((particle) => (
           <motion.div
-            key={sparkle.id}
-            className="absolute rounded-full bg-white"
+            key={particle.id}
+            className="absolute bg-white rounded-full"
             style={{
-              width: sparkle.size,
-              height: sparkle.size,
-              left: sparkle.x,
-              top: sparkle.y,
-              boxShadow: `0 0 ${sparkle.size * 2}px ${
-                sparkle.size / 2
-              }px rgba(255, 255, 255, 0.7)`,
+              width: 1, // Thin vertical line
+              height: particle.length,
+              left: particle.x,
+              top: particle.y,
+              opacity: particle.opacity,
+              backgroundColor: particle.color,
             }}
-            initial={{ opacity: 0, scale: 0, x: 0, y: 0 }}
+            initial={{ y: -particle.length, opacity: 0 }}
             animate={{
-              opacity: [0, 1, 0.5, 1, 0],
-              scale: [0, 1, 0.8, 1, 0],
-              x: [0, sparkle.moveX, sparkle.moveX * 0.5, sparkle.moveX],
-              y: [0, sparkle.moveY, sparkle.moveY * 0.7, sparkle.moveY],
+              y: dimensions.height + particle.length,
+              opacity: particle.opacity,
             }}
             transition={{
-              duration: sparkle.duration,
-              delay: sparkle.delay,
-              ease: "easeInOut",
-              times: [0, 0.2, 0.5, 0.8, 1],
+              duration: particle.duration,
+              delay: particle.delay,
+              ease: "linear", // Consistent falling speed
             }}
-            exit={{ opacity: 0, scale: 0 }}
+            exit={{ opacity: 0 }}
           />
         ))}
       </AnimatePresence>

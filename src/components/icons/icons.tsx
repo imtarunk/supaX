@@ -63,7 +63,7 @@ export const LoginIcon = () => {
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
         id="sign-in"
-        className="h-8 w-8 md:h-12 md:w-12 cursor-pointer hover:scale-110 transition-all duration-300 "
+        className="h-8 w-8 md:h-15 md:w-15  hover:scale-110 transition-all duration-300 cursor-pointer z-20"
       >
         <path
           fill="#6563ff"
