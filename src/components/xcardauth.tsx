@@ -118,10 +118,7 @@ const XConnectPage = () => {
 
   const openWebView = () => {
     // When in a webview, use Google auth instead of Twitter
-    window.open(
-      "https://ed4d-103-211-19-229.ngrok-free.app/api/auth/signin/google",
-      "_blank"
-    );
+    window.open("/api/auth/signin/twitter", "_blank");
   };
 
   return (

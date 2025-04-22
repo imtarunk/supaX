@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     const updatedUser = await prisma.user.update({
       where: { id: user.id },
       data: {
-        points: { decrement: -points },
+        points: { decrement: points },
       },
     });
 

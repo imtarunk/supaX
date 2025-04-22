@@ -106,13 +106,13 @@ const Navbar = ({ initialUser }: { initialUser: User | null }) => {
               <HoverCardTrigger asChild>
                 <div className="cursor-pointer">
                   <a href="/dashboard">
-                    <div className="relative w-8 h-8 md:w-10 md:h-10">
+                    <div className="relative w-8 h-8 md:w-12 md:h-12 border-2 rounded-full  border-gray-700 shadow-lg">
                       <Image
                         src={initialUser?.image || DEFAULT_AVATAR}
                         alt={initialUser?.name || "Profile"}
                         fill
-                        sizes="(max-width: 40px) 100vw, 40px"
-                        className="rounded-full object-cover hover:scale-110 transition-all duration-300 cursor-pointer z-20 border-2 border-gray-700 shadow-lg"
+                        sizes="(max-width: 60px) 100vw, 60px"
+                        className="rounded-full object-cover hover:scale-110 transition-all duration-300 cursor-pointer z-20 border-2 border-gray-700 shadow-lg  "
                         priority
                       />
                     </div>
