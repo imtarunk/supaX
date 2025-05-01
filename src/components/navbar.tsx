@@ -96,7 +96,7 @@ const Navbar = ({ initialUser }: { initialUser: User | null }) => {
           </div>
 
           {/* Elements that only show on non-mobile screens */}
-          <div className="hidden md:block">
+          <div className="hidden md:flex items-center space-x-4">
             <ClaimRewardButton initialUser={initialUser} />
           </div>
 
@@ -192,6 +192,12 @@ const Navbar = ({ initialUser }: { initialUser: User | null }) => {
                 className="block py-2 text-blue-400 hover:text-blue-300"
               >
                 Go to Dashboard
+              </a>
+              <a
+                href="/swap"
+                className="block py-2 text-blue-400 hover:text-blue-300"
+              >
+                Swap Tokens
               </a>
               <button
                 onClick={async () => {

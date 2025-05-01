@@ -32,7 +32,7 @@ export default function AdminPage() {
       icon: "",
       task: [
         {
-          type: "tweet || follow || like",
+          type: "tweet || follow || like || udemy || coursera",
           content: [
             {
               text: "",
@@ -60,7 +60,7 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="min-h-screen  text-gray-100 flex items-center justify-center px-4 sm:px-6 lg:px-8 z-10 relative">
+    <div className="min-h-screen  text-gray-100 flex items-center justify-center px-4 sm:px-6 lg:px-8 z-10">
       <div className="w-full max-w-2xl">
         <div className="border border-gray-800 rounded-xl p-4 sm:p-8 shadow-lg shadow-blue-900/10">
           <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-white text-center">
@@ -117,6 +117,10 @@ export default function AdminPage() {
                         <SelectItem value="tweet">Tweet</SelectItem>
                         <SelectItem value="follow">Follow</SelectItem>
                         <SelectItem value="like">Like</SelectItem>
+                        <SelectItem value="udemy">Udemy Course</SelectItem>
+                        <SelectItem value="coursera">
+                          Coursera Course
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                     <FormDescription className="text-gray-500 text-xs sm:text-sm">
@@ -214,7 +218,7 @@ export default function AdminPage() {
                           className="bg-gray-800 border-gray-700 text-gray-100 focus:border-blue-500 focus:ring-blue-500 placeholder:text-gray-500 h-10 sm:h-12 text-sm sm:text-base"
                         />
                       </FormControl>
-                    ) : (
+                    ) : form.watch("task.0.type") === "like" ? (
                       <FormControl>
                         <Input
                           value={field.value[0]?.text || ""}
@@ -230,13 +234,52 @@ export default function AdminPage() {
                           className="bg-gray-800 border-gray-700 text-gray-100 focus:border-blue-500 focus:ring-blue-500 placeholder:text-gray-500 h-10 sm:h-12 text-sm sm:text-base"
                         />
                       </FormControl>
-                    )}
+                    ) : form.watch("task.0.type") === "udemy" ||
+                      form.watch("task.0.type") === "coursera" ? (
+                      <div className="space-y-4">
+                        <FormControl>
+                          <Input
+                            placeholder="Enter course description"
+                            value={field.value[0]?.text || ""}
+                            onChange={(e) => {
+                              const newContent = [...field.value];
+                              newContent[0] = {
+                                ...newContent[0],
+                                text: e.target.value,
+                              };
+                              field.onChange(newContent);
+                            }}
+                            className="bg-gray-800 border-gray-700 text-gray-100 focus:border-blue-500 focus:ring-blue-500 placeholder:text-gray-500 h-10 sm:h-12 text-sm sm:text-base"
+                          />
+                        </FormControl>
+                        <FormControl>
+                          <Input
+                            placeholder="Enter course URL"
+                            value={field.value[0]?.url || ""}
+                            onChange={(e) => {
+                              const newContent = [...field.value];
+                              newContent[0] = {
+                                ...newContent[0],
+                                url: e.target.value,
+                              };
+                              field.onChange(newContent);
+                            }}
+                            className="bg-gray-800 border-gray-700 text-gray-100 focus:border-blue-500 focus:ring-blue-500 placeholder:text-gray-500 h-10 sm:h-12 text-sm sm:text-base"
+                          />
+                        </FormControl>
+                      </div>
+                    ) : null}
                     <FormDescription className="text-gray-500 text-xs sm:text-sm">
                       {form.watch("task.0.type") === "tweet"
                         ? "Enter the tweet content and optional fields"
                         : form.watch("task.0.type") === "follow"
                         ? "The Twitter handle to follow (without @)"
-                        : "The URL of the tweet to like"}
+                        : form.watch("task.0.type") === "like"
+                        ? "The URL of the tweet to like"
+                        : form.watch("task.0.type") === "udemy" ||
+                          form.watch("task.0.type") === "coursera"
+                        ? "Enter the course description and URL"
+                        : ""}
                     </FormDescription>
                     <FormMessage className="text-red-400 text-xs sm:text-sm" />
                   </FormItem>

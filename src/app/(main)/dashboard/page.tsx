@@ -10,7 +10,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/auth.config";
 import { redirect } from "next/navigation";
 
-type TaskType = "tweet" | "follow" | "like";
+type TaskType = "tweet" | "follow" | "like" | "udemy" | "coursera";
 
 interface TaskItem {
   type: TaskType;

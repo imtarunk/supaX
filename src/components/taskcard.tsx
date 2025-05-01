@@ -5,15 +5,30 @@ import {
   FollowIcon,
   LikeIcon,
   DefaultIcon,
+  UdemyIcon,
+  CourseraIcon,
 } from "@/components/icons/icons";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "sonner";
 import { hardcodedMentions, userIdToMention } from "@/lib/data";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-
+import { verifyCourse } from "@/lib/verifyCourse";
+import { getCoursePurchaseByTransactionId } from "@/lib/courseData";
+import { Button } from "./ui/button";
+import {
+  Drawer,
+  DrawerFooter,
+  DrawerDescription,
+  DrawerTitle,
+  DrawerHeader,
+  DrawerContent,
+  DrawerClose,
+} from "./ui/drawer";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
 // import { mentionData } from "@/lib/data";
-type TaskType = "tweet" | "follow" | "like";
+type TaskType = "tweet" | "follow" | "like" | "udemy" | "coursera";
 
 interface TwitterMention {
   text: string;
@@ -51,6 +66,9 @@ export default function TaskCard({
   const taskType = task[0]?.type;
   const userId = useCurrentUser();
   const loadedUserId = userId?.user?.twitterId;
+  const [isDrowerOpen, setIsDrowerOpen] = useState(false);
+  const [transactionId, setTransactionId] = useState("");
+  const [isVerifying, setIsVerifying] = useState(false);
 
   const rewaredPoints = async () => {
     await axios.post("/api/user/updatepoints", {
@@ -85,6 +103,10 @@ export default function TaskCard({
         return <FollowIcon width={70} height={70} />;
       case "like":
         return <LikeIcon width={70} height={70} />;
+      case "udemy":
+        return <UdemyIcon />;
+      case "coursera":
+        return <CourseraIcon />;
       default:
         return <DefaultIcon width={70} height={70} />;
     }
@@ -115,6 +137,30 @@ export default function TaskCard({
     } catch (err) {
       console.warn("Error processing content:", err);
       return "Error processing content";
+    }
+  };
+
+  const verifyTransaction = async () => {
+    if (!transactionId) {
+      toast.error("Please enter a transaction ID");
+      return;
+    }
+
+    setIsVerifying(true);
+    try {
+      const purchase = getCoursePurchaseByTransactionId(transactionId);
+      if (purchase && purchase.status === "completed") {
+        await rewaredPoints();
+        toast.success("Course purchase verified! Points awarded.");
+        setIsDrowerOpen(false);
+      } else {
+        toast.error("Invalid or pending transaction. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error verifying transaction:", error);
+      toast.error("Failed to verify transaction. Please try again.");
+    } finally {
+      setIsVerifying(false);
     }
   };
 
@@ -263,6 +309,21 @@ export default function TaskCard({
           if (onLoadingChange) onLoadingChange(false);
         }
       }
+      if (taskType === "udemy") {
+        const course = task[0].content[0];
+        if (typeof course === "object" && course !== null) {
+          verifyCourse({ url: course.url || "" });
+          setIsDrowerOpen(true);
+        }
+      }
+      if (taskType === "coursera") {
+        const course = task[0].content[0];
+        console.log("Coursera task", course);
+        if (typeof course === "object" && course !== null) {
+          verifyCourse({ url: course.url || "" });
+          setIsDrowerOpen(true);
+        }
+      }
     } catch (error) {
       console.error("Error handling task click:", error);
       setLoading(false);
@@ -283,7 +344,11 @@ export default function TaskCard({
               ? "Tweet"
               : taskType === "follow"
               ? "Follow"
-              : "Like"}{" "}
+              : taskType === "like"
+              ? "Like"
+              : taskType === "udemy"
+              ? "Udemy"
+              : "Coursera"}{" "}
             Task
           </div>
           <div className="text-gray-400 text-sm sm:text-lg">
@@ -320,6 +385,76 @@ export default function TaskCard({
             : "Go"}
         </button>
       </div>
+      {isDrowerOpen && (
+        <Drawer
+          open={isDrowerOpen}
+          onOpenChange={setIsDrowerOpen}
+          direction="right"
+        >
+          <DrawerContent className="bg-gray-900 border-gray-800">
+            <DrawerHeader className="space-y-4">
+              <DrawerTitle className="text-xl font-bold text-white">
+                Verify Course Purchase
+              </DrawerTitle>
+              <DrawerDescription className="text-gray-400">
+                Please enter your transaction ID to verify your course purchase.
+              </DrawerDescription>
+              <div className="space-y-2">
+                <Label className="text-gray-300">Transaction ID</Label>
+                <Input
+                  placeholder="Enter your transaction ID"
+                  value={transactionId}
+                  onChange={(e) => setTransactionId(e.target.value)}
+                  className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
+                />
+              </div>
+            </DrawerHeader>
+            <DrawerFooter className="flex flex-col gap-4">
+              <Button
+                onClick={verifyTransaction}
+                disabled={isVerifying}
+                className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"
+              >
+                {isVerifying ? (
+                  <>
+                    <svg
+                      className="animate-spin h-4 w-4 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    Verifying...
+                  </>
+                ) : (
+                  "Verify Purchase"
+                )}
+              </Button>
+              <DrawerClose asChild>
+                <Button
+                  variant="outline"
+                  className="border-gray-700 text-gray-300 hover:bg-gray-800"
+                >
+                  Cancel
+                </Button>
+              </DrawerClose>
+            </DrawerFooter>
+          </DrawerContent>
+        </Drawer>
+      )}
     </div>
   );
 }

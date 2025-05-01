@@ -3,7 +3,7 @@
 import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "./theme.provider";
 import { Toaster } from "@/components/ui/sonner";
-import SparklingBackground from "@/components/ui/sparkling-backgroud";
+// import SparklingBackground from "@/components/ui/sparkling-backgroud";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -16,7 +16,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       >
         {children}
         <Toaster />
-        <SparklingBackground />
+        {/* <SparklingBackground /> */}
       </ThemeProvider>
     </SessionProvider>
   );

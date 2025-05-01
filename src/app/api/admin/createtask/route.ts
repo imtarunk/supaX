@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     }
 
     // Validate task type is one of the allowed types
-    const allowedTypes = ["tweet", "follow", "like"];
+    const allowedTypes = ["tweet", "follow", "like", "udemy", "coursera"];
     if (!allowedTypes.includes(task[0].type)) {
       return NextResponse.json(
         { message: "Invalid task type" },
